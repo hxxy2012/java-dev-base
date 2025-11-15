@@ -2,11 +2,13 @@ package com.enterprisex.auth.controller;
 
 import com.enterprisex.auth.domain.LoginRequest;
 import com.enterprisex.auth.domain.LoginResponse;
+import com.enterprisex.auth.service.LoginLogService;
 import com.enterprisex.common.core.constant.Constants;
 import com.enterprisex.common.core.domain.R;
 import com.enterprisex.common.security.service.JwtTokenProvider;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -26,17 +28,22 @@ public class AuthController {
     @Autowired
     private JwtTokenProvider tokenProvider;
 
+    @Autowired
+    private LoginLogService loginLogService;
+
     /**
      * 登录
      */
     @Operation(summary = "用户登录")
     @PostMapping("/login")
-    public R<LoginResponse> login(@Validated @RequestBody LoginRequest request) {
+    public R<LoginResponse> login(@Validated @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
         log.info("用户登录: {}", request.getUsername());
 
         // TODO: 实际项目中应该从数据库验证用户名密码
         // 这里为了演示，直接验证 admin/admin123
         if (!"admin".equals(request.getUsername()) || !"admin123".equals(request.getPassword())) {
+            // 记录登录失败日志
+            loginLogService.recordLoginLog(request.getUsername(), 0, "用户名或密码错误", httpRequest);
             return R.fail("用户名或密码错误");
         }
 
@@ -62,6 +69,9 @@ public class AuthController {
                         .build())
                 .build();
 
+        // 记录登录成功日志
+        loginLogService.recordLoginLog(username, 1, "登录成功", httpRequest);
+
         return R.ok("登录成功", response);
     }
 
@@ -70,8 +80,15 @@ public class AuthController {
      */
     @Operation(summary = "用户登出")
     @PostMapping("/logout")
-    public R<Void> logout() {
+    public R<Void> logout(@RequestHeader(value = "X-Username", required = false) String username,
+                           HttpServletRequest httpRequest) {
         // TODO: 清除Redis中的用户信息
+
+        // 记录登出日志
+        if (username != null && !username.isEmpty()) {
+            loginLogService.recordLoginLog(username, 1, "登出成功", httpRequest);
+        }
+
         return R.ok("登出成功");
     }
 

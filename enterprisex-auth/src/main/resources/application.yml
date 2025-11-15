@@ -29,6 +29,11 @@ jwt:
   expiration: 7200
   refresh-expiration: 604800
 
+# 服务地址配置
+service:
+  system:
+    url: http://localhost:9201
+
 # Knife4j配置
 knife4j:
   enable: true

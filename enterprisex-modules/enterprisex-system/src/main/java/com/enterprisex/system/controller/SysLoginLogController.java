@@ -37,6 +37,16 @@ public class SysLoginLogController {
     }
 
     /**
+     * 新增登录日志
+     */
+    @Operation(summary = "新增登录日志")
+    @PostMapping
+    public R<Void> add(@RequestBody SysLoginLog loginLog) {
+        loginLogService.insertLoginLog(loginLog);
+        return R.ok();
+    }
+
+    /**
      * 根据登录日志ID获取详细信息
      */
     @Operation(summary = "获取登录日志详情")
