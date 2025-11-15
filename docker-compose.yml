@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+  # MySQL数据库
+  mysql:
+    image: mysql:8.0
+    container_name: enterprisex-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: enterprisex
+      TZ: Asia/Shanghai
+    volumes:
+      - ./docker/mysql/data:/var/lib/mysql
+      - ./docker/mysql/conf:/etc/mysql/conf.d
+      - ./sql:/docker-entrypoint-initdb.d
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    networks:
+      - enterprisex-network
+    restart: always
+
+  # Redis缓存
+  redis:
+    image: redis:7-alpine
+    container_name: enterprisex-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - ./docker/redis/data:/data
+    networks:
+      - enterprisex-network
+    restart: always
+
+  # Nacos服务注册与配置中心
+  nacos:
+    image: nacos/nacos-server:v2.3.0
+    container_name: enterprisex-nacos
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    environment:
+      MODE: standalone
+      PREFER_HOST_MODE: hostname
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MYSQL_SERVICE_HOST: mysql
+      MYSQL_SERVICE_DB_NAME: nacos
+      MYSQL_SERVICE_PORT: 3306
+      MYSQL_SERVICE_USER: root
+      MYSQL_SERVICE_PASSWORD: root
+      JVM_XMS: 512m
+      JVM_XMX: 512m
+    volumes:
+      - ./docker/nacos/logs:/home/nacos/logs
+      - ./docker/nacos/data:/home/nacos/data
+    depends_on:
+      - mysql
+    networks:
+      - enterprisex-network
+    restart: always
+
+  # MinIO对象存储（可选）
+  minio:
+    image: minio/minio:latest
+    container_name: enterprisex-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: admin123
+    command: server /data --console-address ":9001"
+    volumes:
+      - ./docker/minio/data:/data
+    networks:
+      - enterprisex-network
+    restart: always
+
+  # Nginx前端静态文件服务（可选）
+  nginx:
+    image: nginx:alpine
+    container_name: enterprisex-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./enterprisex-ui/dist:/usr/share/nginx/html
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - mysql
+      - redis
+      - nacos
+    networks:
+      - enterprisex-network
+    restart: always
+
+networks:
+  enterprisex-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  redis-data:
+  nacos-data:
+  minio-data:
