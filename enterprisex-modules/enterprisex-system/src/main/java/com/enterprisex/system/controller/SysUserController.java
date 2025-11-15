@@ -1,5 +1,7 @@
 package com.enterprisex.system.controller;
 
+import com.enterprisex.common.core.annotation.BusinessType;
+import com.enterprisex.common.core.annotation.Log;
 import com.enterprisex.common.core.domain.R;
 import com.enterprisex.common.core.domain.TableDataInfo;
 import com.enterprisex.system.domain.SysUser;
@@ -51,6 +53,7 @@ public class SysUserController {
     /**
      * 新增用户
      */
+    @Log(title = "用户管理", businessType = BusinessType.INSERT)
     @Operation(summary = "新增用户")
     @PostMapping
     public R<Void> add(@Valid @RequestBody SysUser user) {
@@ -60,6 +63,7 @@ public class SysUserController {
     /**
      * 修改用户
      */
+    @Log(title = "用户管理", businessType = BusinessType.UPDATE)
     @Operation(summary = "修改用户")
     @PutMapping
     public R<Void> edit(@Valid @RequestBody SysUser user) {
@@ -69,6 +73,7 @@ public class SysUserController {
     /**
      * 删除用户
      */
+    @Log(title = "用户管理", businessType = BusinessType.DELETE)
     @Operation(summary = "删除用户")
     @DeleteMapping("/{userIds}")
     public R<Void> remove(@PathVariable Long[] userIds) {

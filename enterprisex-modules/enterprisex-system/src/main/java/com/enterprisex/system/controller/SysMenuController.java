@@ -1,5 +1,7 @@
 package com.enterprisex.system.controller;
 
+import com.enterprisex.common.core.annotation.BusinessType;
+import com.enterprisex.common.core.annotation.Log;
 import com.enterprisex.common.core.domain.R;
 import com.enterprisex.system.domain.SysMenu;
 import com.enterprisex.system.service.ISysMenuService;
@@ -61,6 +63,7 @@ public class SysMenuController {
     /**
      * 新增菜单
      */
+    @Log(title = "菜单管理", businessType = BusinessType.INSERT)
     @Operation(summary = "新增菜单")
     @PostMapping
     public R<Void> add(@Valid @RequestBody SysMenu menu) {
@@ -70,6 +73,7 @@ public class SysMenuController {
     /**
      * 修改菜单
      */
+    @Log(title = "菜单管理", businessType = BusinessType.UPDATE)
     @Operation(summary = "修改菜单")
     @PutMapping
     public R<Void> edit(@Valid @RequestBody SysMenu menu) {
@@ -79,6 +83,7 @@ public class SysMenuController {
     /**
      * 删除菜单
      */
+    @Log(title = "菜单管理", businessType = BusinessType.DELETE)
     @Operation(summary = "删除菜单")
     @DeleteMapping("/{menuId}")
     public R<Void> remove(@PathVariable Long menuId) {

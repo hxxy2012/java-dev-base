@@ -1,5 +1,7 @@
 package com.enterprisex.system.controller;
 
+import com.enterprisex.common.core.annotation.BusinessType;
+import com.enterprisex.common.core.annotation.Log;
 import com.enterprisex.common.core.domain.R;
 import com.enterprisex.common.core.domain.TableDataInfo;
 import com.enterprisex.system.domain.SysRole;
@@ -51,6 +53,7 @@ public class SysRoleController {
     /**
      * 新增角色
      */
+    @Log(title = "角色管理", businessType = BusinessType.INSERT)
     @Operation(summary = "新增角色")
     @PostMapping
     public R<Void> add(@Valid @RequestBody SysRole role) {
@@ -60,6 +63,7 @@ public class SysRoleController {
     /**
      * 修改角色
      */
+    @Log(title = "角色管理", businessType = BusinessType.UPDATE)
     @Operation(summary = "修改角色")
     @PutMapping
     public R<Void> edit(@Valid @RequestBody SysRole role) {
@@ -69,6 +73,7 @@ public class SysRoleController {
     /**
      * 删除角色
      */
+    @Log(title = "角色管理", businessType = BusinessType.DELETE)
     @Operation(summary = "删除角色")
     @DeleteMapping("/{roleIds}")
     public R<Void> remove(@PathVariable Long[] roleIds) {
