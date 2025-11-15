@@ -1,0 +1,120 @@
+import React from 'react';
+import {
+  UserOutlined,
+  TeamOutlined,
+  MenuOutlined,
+  ApartmentOutlined,
+  SolutionOutlined,
+  BookOutlined,
+  SettingOutlined,
+  FileTextOutlined,
+  MonitorOutlined,
+  BellOutlined,
+} from '@ant-design/icons';
+
+export interface MenuItem {
+  key: string;
+  label: string;
+  icon?: React.ReactNode;
+  path?: string;
+  children?: MenuItem[];
+}
+
+/**
+ * 菜单配置
+ */
+export const menuItems: MenuItem[] = [
+  {
+    key: 'system',
+    label: '系统管理',
+    icon: <SettingOutlined />,
+    children: [
+      {
+        key: 'user',
+        label: '用户管理',
+        icon: <UserOutlined />,
+        path: '/system/user',
+      },
+      {
+        key: 'role',
+        label: '角色管理',
+        icon: <TeamOutlined />,
+        path: '/system/role',
+      },
+      {
+        key: 'menu',
+        label: '菜单管理',
+        icon: <MenuOutlined />,
+        path: '/system/menu',
+      },
+      {
+        key: 'dept',
+        label: '部门管理',
+        icon: <ApartmentOutlined />,
+        path: '/system/dept',
+      },
+      {
+        key: 'post',
+        label: '岗位管理',
+        icon: <SolutionOutlined />,
+        path: '/system/post',
+      },
+      {
+        key: 'dict',
+        label: '字典管理',
+        icon: <BookOutlined />,
+        path: '/system/dict/type',
+      },
+      {
+        key: 'config',
+        label: '参数配置',
+        icon: <SettingOutlined />,
+        path: '/system/config',
+      },
+      {
+        key: 'notice',
+        label: '通知公告',
+        icon: <BellOutlined />,
+        path: '/system/notice',
+      },
+    ],
+  },
+  {
+    key: 'monitor',
+    label: '系统监控',
+    icon: <MonitorOutlined />,
+    children: [
+      {
+        key: 'operlog',
+        label: '操作日志',
+        icon: <FileTextOutlined />,
+        path: '/monitor/operlog',
+      },
+      {
+        key: 'loginlog',
+        label: '登录日志',
+        icon: <FileTextOutlined />,
+        path: '/monitor/loginlog',
+      },
+    ],
+  },
+];
+
+/**
+ * 从菜单配置中提取所有路径
+ */
+export const getAllPaths = (items: MenuItem[]): string[] => {
+  const paths: string[] = [];
+  const extract = (menuList: MenuItem[]) => {
+    menuList.forEach((item) => {
+      if (item.path) {
+        paths.push(item.path);
+      }
+      if (item.children) {
+        extract(item.children);
+      }
+    });
+  };
+  extract(items);
+  return paths;
+};

@@ -11,7 +11,6 @@ import {
   message,
   Popconfirm,
   Tag,
-  PageHeader,
 } from 'antd';
 import {
   PlusOutlined,
@@ -230,11 +229,10 @@ const DictDataManage: React.FC = () => {
   return (
     <div style={{ padding: '24px' }}>
       {/* 页面头部 */}
-      <PageHeader
-        onBack={handleBack}
-        title={`字典数据管理 (${dictType})`}
-        style={{ marginBottom: 16, padding: '16px 0' }}
-      />
+      <div style={{ marginBottom: 16, padding: '16px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <Button icon={<ArrowLeftOutlined />} onClick={handleBack} />
+        <h2 style={{ margin: 0 }}>{`字典数据管理 (${dictType})`}</h2>
+      </div>
 
       {/* 搜索栏 */}
       <Form form={searchForm} onFinish={handleSearch} layout="inline" style={{ marginBottom: 16 }}>
