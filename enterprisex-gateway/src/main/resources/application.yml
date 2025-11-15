@@ -1,0 +1,78 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: enterprisex-gateway
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+      config:
+        server-addr: localhost:8848
+        file-extension: yml
+
+    gateway:
+      # 路由配置
+      routes:
+        # 认证服务路由
+        - id: enterprisex-auth
+          uri: lb://enterprisex-auth
+          predicates:
+            - Path=/auth/**
+          filters:
+            - StripPrefix=0
+
+        # 系统服务路由
+        - id: enterprisex-system
+          uri: lb://enterprisex-system
+          predicates:
+            - Path=/system/**
+          filters:
+            - StripPrefix=0
+
+        # 文件服务路由
+        - id: enterprisex-file
+          uri: lb://enterprisex-file
+          predicates:
+            - Path=/file/**
+          filters:
+            - StripPrefix=0
+
+      # 全局跨域配置
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins: "*"
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowed-headers: "*"
+            allow-credentials: true
+            max-age: 3600
+
+      # 默认过滤器
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
+
+  # Redis配置
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      database: 0
+
+# JWT配置
+jwt:
+  secret: WW91ckJhc2U2NEVuY29kZWRTZWNyZXRLZXlNaW5pbXVtMjU2Qml0c0ZvckNTMjU2QWxnb3JpdGhtU2VjdXJpdHk=
+
+# 日志配置
+logging:
+  level:
+    com.enterprisex: debug
+    org.springframework.cloud.gateway: debug
