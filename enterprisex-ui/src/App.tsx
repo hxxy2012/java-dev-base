@@ -26,6 +26,10 @@ import Notice from '@/pages/system/notice';
 import OperLog from '@/pages/monitor/operlog';
 import LoginLog from '@/pages/monitor/loginlog';
 
+// Error pages
+import NotFound from '@/pages/error/NotFound';
+import Forbidden from '@/pages/error/Forbidden';
+
 import 'dayjs/locale/zh-cn';
 
 function App() {
@@ -35,6 +39,8 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
+          <Route path="/403" element={<Forbidden />} />
+          <Route path="/404" element={<NotFound />} />
 
           {/* Protected routes with main layout */}
           <Route
@@ -70,8 +76,8 @@ function App() {
             <Route path="monitor/loginlog" element={<LoginLog />} />
           </Route>
 
-          {/* Catch all - redirect to home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          {/* Catch all - 404 page */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </ConfigProvider>

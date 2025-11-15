@@ -1,5 +1,24 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { message } from 'antd';
+
+// 错误消息映射
+const ERROR_MESSAGES: Record<number, string> = {
+  400: '请求参数错误',
+  401: '未授权，请重新登录',
+  403: '拒绝访问',
+  404: '请求的资源不存在',
+  405: '请求方法不允许',
+  408: '请求超时',
+  500: '服务器内部错误',
+  502: '网关错误',
+  503: '服务不可用',
+  504: '网关超时',
+};
+
+// 不显示错误提示的接口白名单
+const NO_ERROR_MESSAGE_URLS: string[] = [
+  // 可以在这里添加不需要显示错误提示的接口
+];
 
 // 创建axios实例
 const service: AxiosInstance = axios.create({
@@ -48,35 +67,54 @@ service.interceptors.response.use(
 
     return res;
   },
-  (error) => {
+  (error: AxiosError) => {
     console.error('响应错误：', error);
+
+    // 检查是否在白名单中
+    const url = error.config?.url || '';
+    const shouldShowError = !NO_ERROR_MESSAGE_URLS.some(pattern => url.includes(pattern));
+
+    if (!shouldShowError) {
+      return Promise.reject(error);
+    }
 
     if (error.response) {
       const { status, data } = error.response;
+      const errorData = data as any;
 
-      switch (status) {
-        case 401:
-          message.error('未授权，请重新登录');
-          localStorage.removeItem('token');
-          localStorage.removeItem('userInfo');
+      // 401: 未登录或token过期
+      if (status === 401) {
+        message.error('登录已过期，请重新登录');
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        // 延迟跳转，确保消息显示
+        setTimeout(() => {
           window.location.href = '/login';
-          break;
-        case 403:
-          message.error('拒绝访问');
-          break;
-        case 404:
-          message.error('请求的资源不存在');
-          break;
-        case 500:
-          message.error('服务器内部错误');
-          break;
-        default:
-          message.error(data?.msg || `请求失败: ${status}`);
+        }, 1000);
+        return Promise.reject(error);
       }
+
+      // 403: 无权限
+      if (status === 403) {
+        message.error('您没有权限执行此操作');
+        return Promise.reject(error);
+      }
+
+      // 显示错误消息
+      const errorMessage = errorData?.msg || ERROR_MESSAGES[status] || `请求失败 (${status})`;
+      message.error(errorMessage);
     } else if (error.request) {
-      message.error('网络错误，请检查网络连接');
+      // 请求已发送但没有收到响应
+      if (error.code === 'ECONNABORTED') {
+        message.error('请求超时，请稍后重试');
+      } else if (!navigator.onLine) {
+        message.error('网络连接已断开，请检查网络');
+      } else {
+        message.error('网络错误，请检查网络连接');
+      }
     } else {
-      message.error('请求配置错误');
+      // 请求配置错误
+      message.error(error.message || '请求配置错误');
     }
 
     return Promise.reject(error);
