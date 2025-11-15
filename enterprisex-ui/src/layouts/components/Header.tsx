@@ -3,7 +3,6 @@ import { Layout, Avatar, Dropdown, Space } from 'antd';
 import {
   UserOutlined,
   LogoutOutlined,
-  SettingOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
 } from '@ant-design/icons';
@@ -34,17 +33,7 @@ const Header: React.FC<HeaderProps> = ({ collapsed, onToggle }) => {
       icon: <UserOutlined />,
       label: '个人中心',
       onClick: () => {
-        // TODO: 跳转到个人中心页面
-        console.log('个人中心');
-      },
-    },
-    {
-      key: 'settings',
-      icon: <SettingOutlined />,
-      label: '个人设置',
-      onClick: () => {
-        // TODO: 跳转到设置页面
-        console.log('个人设置');
+        navigate('/profile');
       },
     },
     {

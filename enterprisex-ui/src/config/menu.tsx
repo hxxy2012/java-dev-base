@@ -10,6 +10,7 @@ import {
   FileTextOutlined,
   MonitorOutlined,
   BellOutlined,
+  DashboardOutlined,
 } from '@ant-design/icons';
 
 export interface MenuItem {
@@ -24,6 +25,12 @@ export interface MenuItem {
  * 菜单配置
  */
 export const menuItems: MenuItem[] = [
+  {
+    key: 'dashboard',
+    label: '系统首页',
+    icon: <DashboardOutlined />,
+    path: '/dashboard',
+  },
   {
     key: 'system',
     label: '系统管理',

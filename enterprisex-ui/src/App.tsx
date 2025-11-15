@@ -5,6 +5,12 @@ import Login from '@/pages/login';
 import MainLayout from '@/layouts/MainLayout';
 import PrivateRoute from '@/components/PrivateRoute';
 
+// Dashboard
+import Dashboard from '@/pages/dashboard';
+
+// Profile
+import Profile from '@/pages/profile';
+
 // System pages
 import User from '@/pages/system/user';
 import Role from '@/pages/system/role';
@@ -39,8 +45,14 @@ function App() {
               </PrivateRoute>
             }
           >
-            {/* Default redirect to user management */}
-            <Route index element={<Navigate to="/system/user" replace />} />
+            {/* Default redirect to dashboard */}
+            <Route index element={<Navigate to="/dashboard" replace />} />
+
+            {/* Dashboard */}
+            <Route path="dashboard" element={<Dashboard />} />
+
+            {/* Profile */}
+            <Route path="profile" element={<Profile />} />
 
             {/* System management routes */}
             <Route path="system/user" element={<User />} />
