@@ -1,5 +1,7 @@
 package com.enterprisex.system.controller;
 
+import com.enterprisex.common.core.annotation.BusinessType;
+import com.enterprisex.common.core.annotation.Log;
 import com.enterprisex.common.core.domain.R;
 import com.enterprisex.common.core.domain.TableDataInfo;
 import com.enterprisex.system.domain.SysDictData;
@@ -61,6 +63,7 @@ public class SysDictDataController {
     /**
      * 新增字典数据
      */
+    @Log(title = "字典数据", businessType = BusinessType.INSERT)
     @Operation(summary = "新增字典数据")
     @PostMapping
     public R<Void> add(@Valid @RequestBody SysDictData dictData) {
@@ -70,6 +73,7 @@ public class SysDictDataController {
     /**
      * 修改字典数据
      */
+    @Log(title = "字典数据", businessType = BusinessType.UPDATE)
     @Operation(summary = "修改字典数据")
     @PutMapping
     public R<Void> edit(@Valid @RequestBody SysDictData dictData) {
@@ -79,6 +83,7 @@ public class SysDictDataController {
     /**
      * 删除字典数据
      */
+    @Log(title = "字典数据", businessType = BusinessType.DELETE)
     @Operation(summary = "删除字典数据")
     @DeleteMapping("/{dictCodes}")
     public R<Void> remove(@PathVariable Long[] dictCodes) {

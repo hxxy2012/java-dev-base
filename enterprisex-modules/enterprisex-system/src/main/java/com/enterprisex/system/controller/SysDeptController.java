@@ -1,5 +1,7 @@
 package com.enterprisex.system.controller;
 
+import com.enterprisex.common.core.annotation.BusinessType;
+import com.enterprisex.common.core.annotation.Log;
 import com.enterprisex.common.core.domain.R;
 import com.enterprisex.system.domain.SysDept;
 import com.enterprisex.system.service.ISysDeptService;
@@ -61,6 +63,7 @@ public class SysDeptController {
     /**
      * 新增部门
      */
+    @Log(title = "部门管理", businessType = BusinessType.INSERT)
     @Operation(summary = "新增部门")
     @PostMapping
     public R<Void> add(@Valid @RequestBody SysDept dept) {
@@ -70,6 +73,7 @@ public class SysDeptController {
     /**
      * 修改部门
      */
+    @Log(title = "部门管理", businessType = BusinessType.UPDATE)
     @Operation(summary = "修改部门")
     @PutMapping
     public R<Void> edit(@Valid @RequestBody SysDept dept) {
@@ -79,6 +83,7 @@ public class SysDeptController {
     /**
      * 删除部门
      */
+    @Log(title = "部门管理", businessType = BusinessType.DELETE)
     @Operation(summary = "删除部门")
     @DeleteMapping("/{deptId}")
     public R<Void> remove(@PathVariable Long deptId) {

@@ -1,5 +1,7 @@
 package com.enterprisex.system.controller;
 
+import com.enterprisex.common.core.annotation.BusinessType;
+import com.enterprisex.common.core.annotation.Log;
 import com.enterprisex.common.core.domain.R;
 import com.enterprisex.common.core.domain.TableDataInfo;
 import com.enterprisex.system.domain.SysNotice;
@@ -51,6 +53,7 @@ public class SysNoticeController {
     /**
      * 新增通知公告
      */
+    @Log(title = "通知公告", businessType = BusinessType.INSERT)
     @Operation(summary = "新增通知公告")
     @PostMapping
     public R<Void> add(@Valid @RequestBody SysNotice notice) {
@@ -60,6 +63,7 @@ public class SysNoticeController {
     /**
      * 修改通知公告
      */
+    @Log(title = "通知公告", businessType = BusinessType.UPDATE)
     @Operation(summary = "修改通知公告")
     @PutMapping
     public R<Void> edit(@Valid @RequestBody SysNotice notice) {
@@ -69,6 +73,7 @@ public class SysNoticeController {
     /**
      * 删除通知公告
      */
+    @Log(title = "通知公告", businessType = BusinessType.DELETE)
     @Operation(summary = "删除通知公告")
     @DeleteMapping("/{noticeIds}")
     public R<Void> remove(@PathVariable Long[] noticeIds) {

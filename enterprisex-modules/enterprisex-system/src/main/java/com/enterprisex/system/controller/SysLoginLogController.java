@@ -1,5 +1,7 @@
 package com.enterprisex.system.controller;
 
+import com.enterprisex.common.core.annotation.BusinessType;
+import com.enterprisex.common.core.annotation.Log;
 import com.enterprisex.common.core.domain.R;
 import com.enterprisex.common.core.domain.TableDataInfo;
 import com.enterprisex.system.domain.SysLoginLog;
@@ -50,6 +52,7 @@ public class SysLoginLogController {
     /**
      * 删除登录日志
      */
+    @Log(title = "登录日志", businessType = BusinessType.DELETE)
     @Operation(summary = "删除登录日志")
     @DeleteMapping("/{infoIds}")
     public R<Void> remove(@PathVariable Long[] infoIds) {
@@ -59,6 +62,7 @@ public class SysLoginLogController {
     /**
      * 清空登录日志
      */
+    @Log(title = "登录日志", businessType = BusinessType.CLEAN)
     @Operation(summary = "清空登录日志")
     @DeleteMapping("/clean")
     public R<Void> clean() {

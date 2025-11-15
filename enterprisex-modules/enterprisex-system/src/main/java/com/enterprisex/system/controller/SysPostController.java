@@ -1,5 +1,7 @@
 package com.enterprisex.system.controller;
 
+import com.enterprisex.common.core.annotation.BusinessType;
+import com.enterprisex.common.core.annotation.Log;
 import com.enterprisex.common.core.domain.R;
 import com.enterprisex.common.core.domain.TableDataInfo;
 import com.enterprisex.system.domain.SysPost;
@@ -51,6 +53,7 @@ public class SysPostController {
     /**
      * 新增岗位
      */
+    @Log(title = "岗位管理", businessType = BusinessType.INSERT)
     @Operation(summary = "新增岗位")
     @PostMapping
     public R<Void> add(@Valid @RequestBody SysPost post) {
@@ -60,6 +63,7 @@ public class SysPostController {
     /**
      * 修改岗位
      */
+    @Log(title = "岗位管理", businessType = BusinessType.UPDATE)
     @Operation(summary = "修改岗位")
     @PutMapping
     public R<Void> edit(@Valid @RequestBody SysPost post) {
@@ -69,6 +73,7 @@ public class SysPostController {
     /**
      * 删除岗位
      */
+    @Log(title = "岗位管理", businessType = BusinessType.DELETE)
     @Operation(summary = "删除岗位")
     @DeleteMapping("/{postIds}")
     public R<Void> remove(@PathVariable Long[] postIds) {

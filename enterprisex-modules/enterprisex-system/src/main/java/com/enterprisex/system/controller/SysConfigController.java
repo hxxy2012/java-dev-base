@@ -1,5 +1,7 @@
 package com.enterprisex.system.controller;
 
+import com.enterprisex.common.core.annotation.BusinessType;
+import com.enterprisex.common.core.annotation.Log;
 import com.enterprisex.common.core.domain.R;
 import com.enterprisex.common.core.domain.TableDataInfo;
 import com.enterprisex.system.domain.SysConfig;
@@ -61,6 +63,7 @@ public class SysConfigController {
     /**
      * 新增参数配置
      */
+    @Log(title = "参数配置", businessType = BusinessType.INSERT)
     @Operation(summary = "新增参数配置")
     @PostMapping
     public R<Void> add(@Valid @RequestBody SysConfig config) {
@@ -70,6 +73,7 @@ public class SysConfigController {
     /**
      * 修改参数配置
      */
+    @Log(title = "参数配置", businessType = BusinessType.UPDATE)
     @Operation(summary = "修改参数配置")
     @PutMapping
     public R<Void> edit(@Valid @RequestBody SysConfig config) {
@@ -79,6 +83,7 @@ public class SysConfigController {
     /**
      * 删除参数配置
      */
+    @Log(title = "参数配置", businessType = BusinessType.DELETE)
     @Operation(summary = "删除参数配置")
     @DeleteMapping("/{configIds}")
     public R<Void> remove(@PathVariable Long[] configIds) {

@@ -1,5 +1,7 @@
 package com.enterprisex.system.controller;
 
+import com.enterprisex.common.core.annotation.BusinessType;
+import com.enterprisex.common.core.annotation.Log;
 import com.enterprisex.common.core.domain.R;
 import com.enterprisex.common.core.domain.TableDataInfo;
 import com.enterprisex.system.domain.SysOperLog;
@@ -50,6 +52,7 @@ public class SysOperLogController {
     /**
      * 删除操作日志
      */
+    @Log(title = "操作日志", businessType = BusinessType.DELETE)
     @Operation(summary = "删除操作日志")
     @DeleteMapping("/{operIds}")
     public R<Void> remove(@PathVariable Long[] operIds) {
@@ -59,6 +62,7 @@ public class SysOperLogController {
     /**
      * 清空操作日志
      */
+    @Log(title = "操作日志", businessType = BusinessType.CLEAN)
     @Operation(summary = "清空操作日志")
     @DeleteMapping("/clean")
     public R<Void> clean() {
