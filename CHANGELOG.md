@@ -4,6 +4,22 @@
 
 ### Added - 新增功能
 
+#### 数据权限拦截器框架
+- ✅ **@DataScope注解**：用于标记需要数据权限控制的Mapper方法
+- ✅ **DataScopeContext类**：数据权限上下文，存储用户权限信息
+- ✅ **DataScopeInterceptor完善**：实现MyBatis拦截器框架
+  - 从请求Header获取用户ID、部门ID、数据范围等信息
+  - 识别@DataScope注解的Mapper方法
+  - 超级管理员（userId=1）自动拥有全部数据权限
+  - 提供5种数据权限范围的SQL条件构建方法
+  - 支持自定义表别名（deptAlias、userAlias）
+- ✅ **数据权限范围支持**：
+  - 1-全部数据权限：不添加额外条件
+  - 2-自定义数据权限：dept_id IN (指定部门列表)
+  - 3-本部门数据权限：dept_id = 用户部门ID
+  - 4-本部门及以下：dept_id IN (本部门及子部门)
+  - 5-仅本人数据：create_by = 用户ID
+
 #### 认证授权增强
 - ✅ **Token黑名单机制**：用户登出时将token加入黑名单（存储在Redis中）
 - ✅ **用户路由菜单查询**：根据用户角色权限动态返回路由菜单树
@@ -110,7 +126,8 @@
 - ✅ **修复logout功能缺失**：实现完整的登出逻辑（Token黑名单+日志记录）
 - ✅ **修复getRouters返回空数组**：实现根据用户权限查询菜单的完整逻辑
 - ✅ **修复IP访问控制不支持CIDR**：新增CIDR格式支持，完善IP匹配逻辑
-- ✅ **消除3个TODO标记**：完成AuthController和IpAccessController中的待实现功能
+- ✅ **完善数据权限拦截器**：实现用户权限识别和SQL条件构建框架
+- ✅ **消除所有TODO标记**：完成AuthController、IpAccessController和DataScopeInterceptor中的待实现功能
 - 修复Dashboard统计数据不准确的问题
 - 修复未登录用户访问消息接口的安全隐患
 - 修复密码重置功能缺失的问题
