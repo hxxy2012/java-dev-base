@@ -1,12 +1,9 @@
 package com.enterprisex.system.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.enterprisex.common.core.domain.R;
 import com.enterprisex.common.core.utils.SecurityUtils;
-import com.enterprisex.system.domain.SysLoginLog;
-import com.enterprisex.system.domain.SysOperLog;
-import com.enterprisex.system.domain.SysUser;
-import com.enterprisex.system.service.*;
+import com.enterprisex.system.service.IDashboardService;
+import com.enterprisex.system.service.ISysMessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Data;
@@ -15,13 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Dashboard仪表盘控制器
@@ -32,19 +23,7 @@ import java.util.stream.Collectors;
 public class DashboardController {
 
     @Autowired
-    private ISysUserService userService;
-
-    @Autowired
-    private ISysRoleService roleService;
-
-    @Autowired
-    private ISysDeptService deptService;
-
-    @Autowired
-    private ISysOperLogService operLogService;
-
-    @Autowired
-    private ISysLoginLogService loginLogService;
+    private IDashboardService dashboardService;
 
     @Autowired
     private ISysMessageService messageService;
@@ -75,26 +54,19 @@ public class DashboardController {
     public R<DashboardStats> getStats() {
         DashboardStats stats = new DashboardStats();
 
-        // 基础统计
-        stats.setUserCount(userService.count(new LambdaQueryWrapper<SysUser>().eq(SysUser::getDelFlag, 0)));
-        stats.setRoleCount(roleService.count());
-        stats.setDeptCount(deptService.count());
+        // 基础统计（带缓存）
+        Map<String, Long> basicStats = dashboardService.getBasicStats();
+        stats.setUserCount(basicStats.get("userCount"));
+        stats.setRoleCount(basicStats.get("roleCount"));
+        stats.setDeptCount(basicStats.get("deptCount"));
 
         // 在线用户数（这里简化处理，实际应该从Redis获取在线会话数）
         stats.setOnlineUserCount(0L);
 
-        // 今日登录数
-        LocalDateTime todayStart = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
-        stats.setTodayLoginCount(loginLogService.count(
-            new LambdaQueryWrapper<SysLoginLog>()
-                .ge(SysLoginLog::getLoginTime, todayStart)
-        ));
-
-        // 今日操作数
-        stats.setTodayOperCount(operLogService.count(
-            new LambdaQueryWrapper<SysOperLog>()
-                .ge(SysOperLog::getOperTime, todayStart)
-        ));
+        // 今日统计
+        Map<String, Long> todayStats = dashboardService.getTodayStats();
+        stats.setTodayLoginCount(todayStats.get("todayLoginCount"));
+        stats.setTodayOperCount(todayStats.get("todayOperCount"));
 
         // 未读消息数（如果用户已登录）
         Long userId = SecurityUtils.getUserId();
@@ -104,134 +76,17 @@ public class DashboardController {
             stats.setUnreadMessageCount(0L);
         }
 
-        // 最近登录记录
-        stats.setRecentLogins(getRecentLogins());
+        // 最近记录（不缓存，保证实时性）
+        stats.setRecentLogins(dashboardService.getRecentLogins(5));
+        stats.setRecentOperations(dashboardService.getRecentOperations(5));
 
-        // 最近操作记录
-        stats.setRecentOperations(getRecentOperations());
-
-        // 用户状态统计
-        stats.setUserStatusStats(getUserStatusStats());
+        // 用户状态统计（带缓存）
+        stats.setUserStatusStats(dashboardService.getUserStatusStats());
 
         // 近7天登录统计
-        stats.setWeeklyLoginStats(getWeeklyLoginStats());
+        stats.setWeeklyLoginStats(dashboardService.getLoginStats(7));
 
         return R.ok(stats);
-    }
-
-    /**
-     * 获取最近登录记录
-     */
-    private List<Map<String, Object>> getRecentLogins() {
-        List<SysLoginLog> loginLogs = loginLogService.list(
-            new LambdaQueryWrapper<SysLoginLog>()
-                .orderByDesc(SysLoginLog::getLoginTime)
-                .last("LIMIT 5")
-        );
-
-        return loginLogs.stream().map(log -> {
-            Map<String, Object> login = new HashMap<>();
-            login.put("username", log.getUsername());
-            login.put("ip", log.getIpaddr());
-            login.put("time", log.getLoginTime());
-            login.put("status", log.getStatus() == 1 ? "成功" : "失败");
-            login.put("location", log.getLoginLocation());
-            login.put("browser", log.getBrowser());
-            return login;
-        }).collect(Collectors.toList());
-    }
-
-    /**
-     * 获取最近操作记录
-     */
-    private List<Map<String, Object>> getRecentOperations() {
-        List<SysOperLog> operLogs = operLogService.list(
-            new LambdaQueryWrapper<SysOperLog>()
-                .orderByDesc(SysOperLog::getOperTime)
-                .last("LIMIT 5")
-        );
-
-        return operLogs.stream().map(log -> {
-            Map<String, Object> op = new HashMap<>();
-            op.put("title", log.getTitle());
-            op.put("operator", log.getOperName());
-            op.put("time", log.getOperTime());
-            op.put("status", log.getStatus() == 1 ? "成功" : "失败");
-            op.put("businessType", getBusinessTypeName(log.getBusinessType()));
-            op.put("costTime", log.getCostTime());
-            return op;
-        }).collect(Collectors.toList());
-    }
-
-    /**
-     * 获取业务类型名称
-     */
-    private String getBusinessTypeName(Integer businessType) {
-        if (businessType == null) return "其它";
-        switch (businessType) {
-            case 1: return "新增";
-            case 2: return "修改";
-            case 3: return "删除";
-            case 4: return "授权";
-            case 5: return "导出";
-            case 6: return "导入";
-            case 7: return "强退";
-            case 8: return "清空";
-            default: return "其它";
-        }
-    }
-
-    /**
-     * 获取用户状态统计
-     */
-    private Map<String, Long> getUserStatusStats() {
-        Map<String, Long> statusStats = new HashMap<>();
-
-        // 统计正常用户数
-        long normalCount = userService.count(
-            new LambdaQueryWrapper<SysUser>()
-                .eq(SysUser::getStatus, 1)
-                .eq(SysUser::getDelFlag, 0)
-        );
-
-        // 统计禁用用户数
-        long disabledCount = userService.count(
-            new LambdaQueryWrapper<SysUser>()
-                .eq(SysUser::getStatus, 0)
-                .eq(SysUser::getDelFlag, 0)
-        );
-
-        statusStats.put("正常", normalCount);
-        statusStats.put("禁用", disabledCount);
-        return statusStats;
-    }
-
-    /**
-     * 获取近7天登录统计
-     */
-    private List<Map<String, Object>> getWeeklyLoginStats() {
-        List<Map<String, Object>> weeklyStats = new ArrayList<>();
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd");
-
-        for (int i = 6; i >= 0; i--) {
-            LocalDate date = LocalDate.now().minusDays(i);
-            LocalDateTime dayStart = date.atStartOfDay();
-            LocalDateTime dayEnd = date.atTime(23, 59, 59);
-
-            // 统计当天的登录次数
-            long count = loginLogService.count(
-                new LambdaQueryWrapper<SysLoginLog>()
-                    .ge(SysLoginLog::getLoginTime, dayStart)
-                    .le(SysLoginLog::getLoginTime, dayEnd)
-            );
-
-            Map<String, Object> dayStat = new HashMap<>();
-            dayStat.put("date", date.format(dateFormatter));
-            dayStat.put("count", count);
-            weeklyStats.add(dayStat);
-        }
-
-        return weeklyStats;
     }
 
     /**

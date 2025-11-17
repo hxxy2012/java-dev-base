@@ -4,6 +4,13 @@
 
 ### Added - 新增功能
 
+#### Dashboard性能优化
+- ✅ 实现服务层抽象（IDashboardService接口）
+- ✅ 添加Redis缓存支持（基础统计、用户状态统计）
+- ✅ 缓存策略：稳定数据5分钟TTL，实时数据不缓存
+- ✅ 重构Controller层，分离业务逻辑到Service层
+- ✅ 优化代码结构和可维护性
+
 #### SecurityUtils工具类
 - 新增`SecurityUtils`工具类，统一管理用户上下文信息
 - 支持从请求头获取当前登录用户ID和用户名
@@ -137,7 +144,7 @@
 
 ### 高优先级
 - [ ] 实现在线用户统计（从Redis Session获取）
-- [ ] 添加Dashboard数据缓存（提升性能）
+- [x] 添加Dashboard数据缓存（提升性能）
 - [ ] 实现实时数据推送（WebSocket）
 - [ ] 添加数据导出功能（PDF、Excel）
 
