@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Form, Input, Button, Checkbox, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { post } from '@/utils/request';
+import { login, getRouters } from '@/api/auth';
+import { useAuthStore } from '@/store/authStore';
 import './index.less';
 
 interface LoginForm {
@@ -14,21 +15,33 @@ interface LoginForm {
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const { setToken, setUserInfo, setRoutes } = useAuthStore();
 
   const onFinish = async (values: LoginForm) => {
     setLoading(true);
     try {
-      const response = await post('/auth/login', {
+      // 登录获取token和用户信息
+      const loginResponse = await login({
         username: values.username,
         password: values.password,
       });
 
-      if (response.code === 200) {
-        const { accessToken, userInfo } = response.data;
+      if (loginResponse.code === 200) {
+        const { accessToken, userInfo } = loginResponse.data;
 
-        // 保存token和用户信息
-        localStorage.setItem('token', accessToken);
-        localStorage.setItem('userInfo', JSON.stringify(userInfo));
+        // 保存token和用户信息到store
+        setToken(accessToken);
+        setUserInfo(userInfo);
+
+        // 获取用户路由菜单
+        try {
+          const routeResponse = await getRouters();
+          if (routeResponse.code === 200 && routeResponse.data) {
+            setRoutes(routeResponse.data);
+          }
+        } catch (error) {
+          console.error('获取路由失败：', error);
+        }
 
         if (values.remember) {
           localStorage.setItem('username', values.username);

@@ -136,4 +136,17 @@ public class AuthController {
 
         return R.ok(userInfo);
     }
+
+    /**
+     * 获取用户路由菜单
+     */
+    @Operation(summary = "获取用户路由菜单")
+    @GetMapping("/getRouters")
+    public R<?> getRouters(@RequestHeader(value = "X-User-Id", required = false) Long userId,
+                            @RequestHeader(value = "X-Username", required = false) String username) {
+        // TODO: 根据用户权限从数据库查询菜单
+        // 暂时返回空数组，前端会使用默认路由
+        log.info("获取用户路由菜单: userId={}, username={}", userId, username);
+        return R.ok(new java.util.ArrayList<>());
+    }
 }

@@ -4,10 +4,12 @@ import com.enterprisex.common.core.annotation.BusinessType;
 import com.enterprisex.common.core.annotation.Log;
 import com.enterprisex.common.core.domain.R;
 import com.enterprisex.common.core.domain.TableDataInfo;
+import com.enterprisex.common.excel.utils.ExcelUtil;
 import com.enterprisex.system.domain.SysUser;
 import com.enterprisex.system.service.ISysUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -100,5 +102,16 @@ public class SysUserController {
         updateUser.setUserId(user.getUserId());
         updateUser.setStatus(user.getStatus());
         return R.toAjax(userService.updateById(updateUser));
+    }
+
+    /**
+     * 导出用户数据
+     */
+    @Log(title = "用户管理", businessType = BusinessType.EXPORT)
+    @Operation(summary = "导出用户数据")
+    @GetMapping("/export")
+    public void export(SysUser user, HttpServletResponse response) {
+        List<SysUser> list = userService.selectUserList(user);
+        ExcelUtil.exportExcel(response, list, SysUser.class, "用户数据");
     }
 }

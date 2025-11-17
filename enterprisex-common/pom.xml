@@ -24,6 +24,7 @@
         <module>common-log</module>
         <module>common-swagger</module>
         <module>common-mybatis</module>
+        <module>common-excel</module>
     </modules>
 
 </project>

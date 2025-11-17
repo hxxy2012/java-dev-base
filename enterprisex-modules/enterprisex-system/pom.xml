@@ -33,6 +33,10 @@
             <groupId>com.enterprisex</groupId>
             <artifactId>common-redis</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.enterprisex</groupId>
+            <artifactId>common-excel</artifactId>
+        </dependency>
 
         <!-- Spring Cloud -->
         <dependency>
