@@ -35,6 +35,7 @@ const JobLog = lazy(() => import('@/pages/monitor/job/log'));
 const ServerMonitor = lazy(() => import('@/pages/monitor/server'));
 const CodeGen = lazy(() => import('@/pages/tool/gen'));
 const FileManage = lazy(() => import('@/pages/system/file'));
+const SwaggerDoc = lazy(() => import('@/pages/tool/swagger'));
 
 function App() {
   const { routes } = useAuthStore();
@@ -68,6 +69,7 @@ function App() {
         { path: 'monitor/server', element: <ServerMonitor /> },
         { path: 'tool/gen', element: <CodeGen /> },
         { path: 'system/file', element: <FileManage /> },
+        { path: 'tool/swagger', element: <SwaggerDoc /> },
       ]);
     }
   }, [routes]);

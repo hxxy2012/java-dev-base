@@ -153,6 +153,12 @@ export const menuItems: MenuItem[] = [
         icon: <FileTextOutlined />,
         path: '/system/file',
       },
+      {
+        key: 'swagger',
+        label: '系统接口',
+        icon: <FileTextOutlined />,
+        path: '/tool/swagger',
+      },
     ],
   },
 ];
