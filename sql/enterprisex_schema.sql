@@ -335,15 +335,23 @@ DROP TABLE IF EXISTS `sys_file`;
 CREATE TABLE `sys_file` (
     `file_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '文件ID',
     `file_name` VARCHAR(255) NOT NULL COMMENT '文件名称',
+    `original_name` VARCHAR(255) DEFAULT NULL COMMENT '原始文件名',
     `file_path` VARCHAR(500) NOT NULL COMMENT '文件路径',
     `file_url` VARCHAR(500) DEFAULT NULL COMMENT '文件URL',
     `file_size` BIGINT DEFAULT 0 COMMENT '文件大小（字节）',
     `file_type` VARCHAR(100) DEFAULT NULL COMMENT '文件类型',
-    `storage_type` VARCHAR(20) DEFAULT 'local' COMMENT '存储类型：local本地minio对象存储oss阿里云',
+    `file_ext` VARCHAR(50) DEFAULT NULL COMMENT '文件扩展名',
+    `storage_location` VARCHAR(20) DEFAULT 'local' COMMENT '存储位置：local本地 minio对象存储',
+    `upload_by` VARCHAR(50) DEFAULT NULL COMMENT '上传者',
+    `upload_ip` VARCHAR(128) DEFAULT NULL COMMENT '上传IP',
     `create_by` VARCHAR(50) DEFAULT NULL COMMENT '创建者',
     `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_by` VARCHAR(50) DEFAULT NULL COMMENT '更新者',
+    `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
     PRIMARY KEY (`file_id`),
-    KEY `idx_create_time` (`create_time`)
+    KEY `idx_create_time` (`create_time`),
+    KEY `idx_file_name` (`file_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='文件信息表';
 
 -- ========================================

@@ -147,6 +147,12 @@ export const menuItems: MenuItem[] = [
         icon: <FileTextOutlined />,
         path: '/tool/gen',
       },
+      {
+        key: 'file',
+        label: '文件管理',
+        icon: <FileTextOutlined />,
+        path: '/system/file',
+      },
     ],
   },
 ];

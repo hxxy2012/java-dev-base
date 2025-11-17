@@ -23,6 +23,7 @@ const JobManage = lazy(() => import('@/pages/monitor/job'));
 const JobLog = lazy(() => import('@/pages/monitor/job/log'));
 const ServerMonitor = lazy(() => import('@/pages/monitor/server'));
 const CodeGen = lazy(() => import('@/pages/tool/gen'));
+const FileManage = lazy(() => import('@/pages/system/file'));
 
 // 组件映射表
 const componentMap: Record<string, React.LazyExoticComponent<React.FC<any>>> = {
@@ -45,6 +46,7 @@ const componentMap: Record<string, React.LazyExoticComponent<React.FC<any>>> = {
   'monitor/cache/index': CacheManage,
   'monitor/server/index': ServerMonitor,
   'tool/gen/index': CodeGen,
+  'system/file/index': FileManage,
 };
 
 /**
