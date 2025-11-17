@@ -28,7 +28,7 @@ spring:
         - id: enterprisex-system
           uri: lb://enterprisex-system
           predicates:
-            - Path=/system/**
+            - Path=/system/**,/monitor/**
           filters:
             - StripPrefix=0
 

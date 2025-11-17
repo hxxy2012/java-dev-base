@@ -28,6 +28,8 @@ const Config = lazy(() => import('@/pages/system/config'));
 const Notice = lazy(() => import('@/pages/system/notice'));
 const OperLog = lazy(() => import('@/pages/monitor/operlog'));
 const LoginLog = lazy(() => import('@/pages/monitor/loginlog'));
+const OnlineUser = lazy(() => import('@/pages/monitor/online'));
+const CacheManage = lazy(() => import('@/pages/monitor/cache'));
 
 function App() {
   const { routes } = useAuthStore();
@@ -54,6 +56,8 @@ function App() {
         { path: 'system/notice', element: <Notice /> },
         { path: 'monitor/operlog', element: <OperLog /> },
         { path: 'monitor/loginlog', element: <LoginLog /> },
+        { path: 'monitor/online', element: <OnlineUser /> },
+        { path: 'monitor/cache', element: <CacheManage /> },
       ]);
     }
   }, [routes]);

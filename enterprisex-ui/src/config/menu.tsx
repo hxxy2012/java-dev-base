@@ -92,6 +92,18 @@ export const menuItems: MenuItem[] = [
     icon: <MonitorOutlined />,
     children: [
       {
+        key: 'online',
+        label: '在线用户',
+        icon: <FileTextOutlined />,
+        path: '/monitor/online',
+      },
+      {
+        key: 'cache',
+        label: '缓存管理',
+        icon: <FileTextOutlined />,
+        path: '/monitor/cache',
+      },
+      {
         key: 'operlog',
         label: '操作日志',
         icon: <FileTextOutlined />,
