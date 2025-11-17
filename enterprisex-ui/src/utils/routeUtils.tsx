@@ -25,6 +25,7 @@ const ServerMonitor = lazy(() => import('@/pages/monitor/server'));
 const CodeGen = lazy(() => import('@/pages/tool/gen'));
 const FileManage = lazy(() => import('@/pages/system/file'));
 const SwaggerDoc = lazy(() => import('@/pages/tool/swagger'));
+const SystemTool = lazy(() => import('@/pages/tool/system'));
 
 // 组件映射表
 const componentMap: Record<string, React.LazyExoticComponent<React.FC<any>>> = {
@@ -49,6 +50,7 @@ const componentMap: Record<string, React.LazyExoticComponent<React.FC<any>>> = {
   'tool/gen/index': CodeGen,
   'system/file/index': FileManage,
   'tool/swagger/index': SwaggerDoc,
+  'tool/system/index': SystemTool,
 };
 
 /**
