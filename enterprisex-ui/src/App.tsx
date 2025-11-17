@@ -26,6 +26,8 @@ const DictType = lazy(() => import('@/pages/system/dict/type'));
 const DictData = lazy(() => import('@/pages/system/dict/data'));
 const Config = lazy(() => import('@/pages/system/config'));
 const Notice = lazy(() => import('@/pages/system/notice'));
+const MessagePage = lazy(() => import('@/pages/system/message'));
+const IpAccessPage = lazy(() => import('@/pages/system/ipaccess'));
 const OperLog = lazy(() => import('@/pages/monitor/operlog'));
 const LoginLog = lazy(() => import('@/pages/monitor/loginlog'));
 const OnlineUser = lazy(() => import('@/pages/monitor/online'));
@@ -65,6 +67,8 @@ function App() {
         { path: 'system/dict/data', element: <DictData /> },
         { path: 'system/config', element: <Config /> },
         { path: 'system/notice', element: <Notice /> },
+        { path: 'system/message', element: <MessagePage /> },
+        { path: 'system/ipaccess', element: <IpAccessPage /> },
         { path: 'monitor/operlog', element: <OperLog /> },
         { path: 'monitor/loginlog', element: <LoginLog /> },
         { path: 'monitor/online', element: <OnlineUser /> },

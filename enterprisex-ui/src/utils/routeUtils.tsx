@@ -15,6 +15,8 @@ const DictType = lazy(() => import('@/pages/system/dict/type'));
 const DictData = lazy(() => import('@/pages/system/dict/data'));
 const Config = lazy(() => import('@/pages/system/config'));
 const Notice = lazy(() => import('@/pages/system/notice'));
+const MessagePage = lazy(() => import('@/pages/system/message'));
+const IpAccessPage = lazy(() => import('@/pages/system/ipaccess'));
 const OperLog = lazy(() => import('@/pages/monitor/operlog'));
 const LoginLog = lazy(() => import('@/pages/monitor/loginlog'));
 const OnlineUser = lazy(() => import('@/pages/monitor/online'));
@@ -44,6 +46,8 @@ const componentMap: Record<string, React.LazyExoticComponent<React.FC<any>>> = {
   'system/dict/data/index': DictData,
   'system/config/index': Config,
   'system/notice/index': Notice,
+  'system/message/index': MessagePage,
+  'system/ipaccess/index': IpAccessPage,
   'monitor/operlog/index': OperLog,
   'monitor/loginlog/index': LoginLog,
   'monitor/online/index': OnlineUser,

@@ -85,6 +85,18 @@ export const menuItems: MenuItem[] = [
         icon: <BellOutlined />,
         path: '/system/notice',
       },
+      {
+        key: 'message',
+        label: '消息中心',
+        icon: <BellOutlined />,
+        path: '/system/message',
+      },
+      {
+        key: 'ipaccess',
+        label: 'IP访问控制',
+        icon: <FileTextOutlined />,
+        path: '/system/ipaccess',
+      },
     ],
   },
   {
