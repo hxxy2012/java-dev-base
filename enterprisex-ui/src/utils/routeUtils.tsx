@@ -24,8 +24,10 @@ const JobLog = lazy(() => import('@/pages/monitor/job/log'));
 const ServerMonitor = lazy(() => import('@/pages/monitor/server'));
 const CodeGen = lazy(() => import('@/pages/tool/gen'));
 const FileManage = lazy(() => import('@/pages/system/file'));
+const DatabasePage = lazy(() => import('@/pages/tool/database'));
 const SwaggerDoc = lazy(() => import('@/pages/tool/swagger'));
 const SystemTool = lazy(() => import('@/pages/tool/system'));
+const HealthCheckPage = lazy(() => import('@/pages/monitor/health'));
 
 // 组件映射表
 const componentMap: Record<string, React.LazyExoticComponent<React.FC<any>>> = {
@@ -49,8 +51,10 @@ const componentMap: Record<string, React.LazyExoticComponent<React.FC<any>>> = {
   'monitor/server/index': ServerMonitor,
   'tool/gen/index': CodeGen,
   'system/file/index': FileManage,
+  'tool/database/index': DatabasePage,
   'tool/swagger/index': SwaggerDoc,
   'tool/system/index': SystemTool,
+  'monitor/health/index': HealthCheckPage,
 };
 
 /**

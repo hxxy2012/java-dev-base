@@ -117,6 +117,12 @@ export const menuItems: MenuItem[] = [
         path: '/monitor/server',
       },
       {
+        key: 'health',
+        label: '健康检查',
+        icon: <FileTextOutlined />,
+        path: '/monitor/health',
+      },
+      {
         key: 'operlog',
         label: '操作日志',
         icon: <FileTextOutlined />,
@@ -152,6 +158,12 @@ export const menuItems: MenuItem[] = [
         label: '文件管理',
         icon: <FileTextOutlined />,
         path: '/system/file',
+      },
+      {
+        key: 'database',
+        label: '数据库管理',
+        icon: <FileTextOutlined />,
+        path: '/tool/database',
       },
       {
         key: 'swagger',
