@@ -89,4 +89,15 @@ public class SysConfigController {
     public R<Void> remove(@PathVariable Long[] configIds) {
         return R.toAjax(configService.deleteConfigByIds(configIds));
     }
+
+    /**
+     * 清除配置缓存
+     */
+    @Log(title = "参数配置", businessType = BusinessType.CLEAN)
+    @Operation(summary = "清除配置缓存")
+    @DeleteMapping("/cache/clear")
+    public R<Void> clearCache() {
+        configService.clearAllConfigCache();
+        return R.ok("缓存清除成功");
+    }
 }

@@ -3,23 +3,41 @@ package com.enterprisex.system.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.enterprisex.common.core.exception.ServiceException;
+import com.enterprisex.common.redis.service.RedisCache;
 import com.enterprisex.system.domain.SysConfig;
 import com.enterprisex.system.mapper.SysConfigMapper;
 import com.enterprisex.system.service.ISysConfigService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 参数配置 服务层实现
  *
  * @author EnterpriseX
  */
+@Slf4j
 @Service
 public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig> implements ISysConfigService {
+
+    @Autowired
+    private RedisCache redisCache;
+
+    /**
+     * 系统配置缓存Key前缀
+     */
+    private static final String CONFIG_CACHE_KEY = "sys_config:";
+
+    /**
+     * 缓存过期时间（分钟）
+     */
+    private static final int CACHE_EXPIRE_MINUTES = 30;
 
     /**
      * 查询参数配置列表
@@ -46,17 +64,38 @@ public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig
     }
 
     /**
-     * 根据参数键名查询参数值
+     * 根据参数键名查询参数值（带缓存）
      *
      * @param configKey 参数键名
      * @return 参数键值
      */
     @Override
     public String selectConfigByKey(String configKey) {
+        if (!StringUtils.hasText(configKey)) {
+            return null;
+        }
+
+        // 尝试从缓存获取
+        String cacheKey = CONFIG_CACHE_KEY + configKey;
+        String cachedValue = redisCache.getCacheObject(cacheKey);
+        if (cachedValue != null) {
+            log.debug("从缓存获取系统配置: configKey={}, value={}", configKey, cachedValue);
+            return cachedValue;
+        }
+
+        // 缓存未命中，从数据库查询
         LambdaQueryWrapper<SysConfig> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(SysConfig::getConfigKey, configKey);
         SysConfig config = baseMapper.selectOne(queryWrapper);
-        return config != null ? config.getConfigValue() : null;
+
+        if (config != null && StringUtils.hasText(config.getConfigValue())) {
+            // 存入缓存
+            redisCache.setCacheObject(cacheKey, config.getConfigValue(), CACHE_EXPIRE_MINUTES, TimeUnit.MINUTES);
+            log.debug("系统配置已缓存: configKey={}, value={}", configKey, config.getConfigValue());
+            return config.getConfigValue();
+        }
+
+        return null;
     }
 
     /**
@@ -86,7 +125,12 @@ public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig
         if (!checkConfigKeyUnique(config)) {
             throw new ServiceException("新增参数'" + config.getConfigName() + "'失败，参数键名已存在");
         }
-        return baseMapper.insert(config);
+        int result = baseMapper.insert(config);
+        if (result > 0) {
+            // 清除缓存
+            clearConfigCache(config.getConfigKey());
+        }
+        return result;
     }
 
     /**
@@ -101,7 +145,13 @@ public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig
         if (!checkConfigKeyUnique(config)) {
             throw new ServiceException("修改参数'" + config.getConfigName() + "'失败，参数键名已存在");
         }
-        return baseMapper.updateById(config);
+        int result = baseMapper.updateById(config);
+        if (result > 0) {
+            // 清除缓存
+            clearConfigCache(config.getConfigKey());
+            log.info("修改系统配置并清除缓存: configKey={}", config.getConfigKey());
+        }
+        return result;
     }
 
     /**
@@ -113,12 +163,55 @@ public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int deleteConfigByIds(Long[] configIds) {
+        // 先查询所有配置并验证
+        List<SysConfig> configsToDelete = new java.util.ArrayList<>();
         for (Long configId : configIds) {
             SysConfig config = baseMapper.selectById(configId);
-            if (config != null && config.getConfigType() == 1) {
-                throw new ServiceException("内置参数【" + config.getConfigKey() + "】不能删除");
+            if (config != null) {
+                if (config.getConfigType() == 1) {
+                    throw new ServiceException("内置参数【" + config.getConfigKey() + "】不能删除");
+                }
+                configsToDelete.add(config);
             }
         }
-        return baseMapper.deleteBatchIds(Arrays.asList(configIds));
+
+        // 执行删除
+        int result = baseMapper.deleteBatchIds(Arrays.asList(configIds));
+        if (result > 0) {
+            // 清除已删除配置的缓存
+            for (SysConfig config : configsToDelete) {
+                clearConfigCache(config.getConfigKey());
+            }
+            log.info("删除系统配置并清除缓存: count={}", result);
+        }
+        return result;
+    }
+
+    /**
+     * 清除指定配置的缓存
+     *
+     * @param configKey 参数键名
+     */
+    private void clearConfigCache(String configKey) {
+        if (StringUtils.hasText(configKey)) {
+            String cacheKey = CONFIG_CACHE_KEY + configKey;
+            redisCache.deleteObject(cacheKey);
+            log.debug("清除系统配置缓存: configKey={}", configKey);
+        }
+    }
+
+    /**
+     * 清除所有配置缓存
+     */
+    public void clearAllConfigCache() {
+        try {
+            java.util.Collection<String> keys = redisCache.keys(CONFIG_CACHE_KEY + "*");
+            if (keys != null && !keys.isEmpty()) {
+                redisCache.deleteObject(keys);
+                log.info("清除所有系统配置缓存: count={}", keys.size());
+            }
+        } catch (Exception e) {
+            log.error("清除系统配置缓存失败", e);
+        }
     }
 }

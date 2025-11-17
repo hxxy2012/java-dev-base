@@ -59,4 +59,9 @@ public interface ISysConfigService extends IService<SysConfig> {
      * @return 结果
      */
     int deleteConfigByIds(Long[] configIds);
+
+    /**
+     * 清除所有配置缓存
+     */
+    void clearAllConfigCache();
 }

@@ -7,11 +7,13 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -34,6 +36,14 @@ public class AuthFilter implements GlobalFilter, Ordered {
 
     @Value("${jwt.secret}")
     private String secret;
+
+    @Autowired
+    private ReactiveStringRedisTemplate redisTemplate;
+
+    /**
+     * Token黑名单缓存Key前缀
+     */
+    private static final String TOKEN_BLACKLIST_KEY = "token_blacklist:";
 
     /**
      * 白名单路径（不需要认证）
@@ -72,13 +82,31 @@ public class AuthFilter implements GlobalFilter, Ordered {
             String userId = claims.getSubject();
             String username = claims.get("username", String.class);
 
-            // 将用户信息传递给下游服务
-            ServerHttpRequest mutatedRequest = request.mutate()
-                    .header("X-User-Id", userId)
-                    .header("X-Username", username)
-                    .build();
+            // 检查Token是否在黑名单中
+            return isTokenBlacklisted(token)
+                    .flatMap(isBlacklisted -> {
+                        if (isBlacklisted) {
+                            log.warn("Token已失效（在黑名单中）: userId={}", userId);
+                            return unauthorized(response, "Token已失效，请重新登录");
+                        }
 
-            return chain.filter(exchange.mutate().request(mutatedRequest).build());
+                        // 将用户信息传递给下游服务
+                        ServerHttpRequest mutatedRequest = request.mutate()
+                                .header("X-User-Id", userId)
+                                .header("X-Username", username)
+                                .build();
+
+                        return chain.filter(exchange.mutate().request(mutatedRequest).build());
+                    })
+                    .onErrorResume(error -> {
+                        log.error("Token黑名单检查失败，允许通过: {}", error.getMessage());
+                        // Redis故障时不阻止正常访问
+                        ServerHttpRequest mutatedRequest = request.mutate()
+                                .header("X-User-Id", userId)
+                                .header("X-Username", username)
+                                .build();
+                        return chain.filter(exchange.mutate().request(mutatedRequest).build());
+                    });
 
         } catch (Exception e) {
             log.error("Token验证失败: {}", e.getMessage());
@@ -116,6 +144,27 @@ public class AuthFilter implements GlobalFilter, Ordered {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    /**
+     * 检查Token是否在黑名单中（响应式）
+     *
+     * @param token JWT token
+     * @return Mono<Boolean> true-在黑名单中 false-不在黑名单中
+     */
+    private Mono<Boolean> isTokenBlacklisted(String token) {
+        if (token == null || token.isEmpty()) {
+            return Mono.just(false);
+        }
+
+        String key = TOKEN_BLACKLIST_KEY + token;
+        return redisTemplate.hasKey(key)
+                .defaultIfEmpty(false)
+                .doOnNext(isBlacklisted -> {
+                    if (isBlacklisted) {
+                        log.debug("Token在黑名单中: {}", token.substring(0, Math.min(20, token.length())) + "...");
+                    }
+                });
     }
 
     /**

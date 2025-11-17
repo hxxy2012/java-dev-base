@@ -6,7 +6,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -17,8 +21,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.nio.file.AccessDeniedException;
+import java.sql.SQLException;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -171,22 +178,99 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 404异常 - 资源未找到
+     */
+    @ExceptionHandler(NoHandlerFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public R<?> handleNoHandlerFoundException(NoHandlerFoundException e, HttpServletRequest request) {
+        log.warn("请求地址不存在: {} - {}", request.getRequestURI(), e.getMessage());
+        return R.fail(HttpStatus.NOT_FOUND.value(), "请求地址不存在: " + request.getRequestURI());
+    }
+
+    /**
+     * HTTP消息不可读异常（通常是JSON格式错误）
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public R<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException e, HttpServletRequest request) {
+        log.error("请求体解析失败: {} - {}", request.getRequestURI(), e.getMessage());
+        return R.fail(HttpStatus.BAD_REQUEST.value(), "请求数据格式错误，请检查JSON格式");
+    }
+
+    /**
+     * 数据库唯一键冲突异常
+     */
+    @ExceptionHandler(DuplicateKeyException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public R<?> handleDuplicateKeyException(DuplicateKeyException e, HttpServletRequest request) {
+        log.error("数据库唯一键冲突: {} - {}", request.getRequestURI(), e.getMessage());
+        return R.fail(HttpStatus.CONFLICT.value(), "数据已存在，请勿重复操作");
+    }
+
+    /**
+     * 数据完整性约束异常
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public R<?> handleDataIntegrityViolationException(DataIntegrityViolationException e, HttpServletRequest request) {
+        log.error("数据完整性约束异常: {} - {}", request.getRequestURI(), e.getMessage());
+        String message = "数据操作失败";
+        if (e.getMessage() != null) {
+            if (e.getMessage().contains("foreign key")) {
+                message = "存在关联数据，无法删除";
+            } else if (e.getMessage().contains("Duplicate entry")) {
+                message = "数据已存在，请勿重复添加";
+            }
+        }
+        return R.fail(HttpStatus.BAD_REQUEST.value(), message);
+    }
+
+    /**
+     * 数据库访问异常
+     */
+    @ExceptionHandler(DataAccessException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public R<?> handleDataAccessException(DataAccessException e, HttpServletRequest request) {
+        String errorId = UUID.randomUUID().toString();
+        log.error("数据库访问异常 [ErrorID: {}]: {} - ", errorId, request.getRequestURI(), e);
+        return R.fail(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "数据库操作失败，请联系管理员（错误ID: " + errorId.substring(0, 8) + "）");
+    }
+
+    /**
+     * SQL异常
+     */
+    @ExceptionHandler(SQLException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public R<?> handleSQLException(SQLException e, HttpServletRequest request) {
+        String errorId = UUID.randomUUID().toString();
+        log.error("SQL执行异常 [ErrorID: {}]: {} - SQLState: {}, ErrorCode: {}",
+                errorId, request.getRequestURI(), e.getSQLState(), e.getErrorCode(), e);
+        return R.fail(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "数据库查询失败，请联系管理员（错误ID: " + errorId.substring(0, 8) + "）");
+    }
+
+    /**
      * 运行时异常
      */
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public R<?> handleRuntimeException(RuntimeException e, HttpServletRequest request) {
-        log.error("运行时异常: {} - ", request.getRequestURI(), e);
-        return R.fail(HttpStatus.INTERNAL_SERVER_ERROR.value(), "系统运行时错误，请联系管理员");
+        String errorId = UUID.randomUUID().toString();
+        log.error("运行时异常 [ErrorID: {}]: {} - ", errorId, request.getRequestURI(), e);
+        return R.fail(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "系统运行时错误，请联系管理员（错误ID: " + errorId.substring(0, 8) + "）");
     }
 
     /**
-     * 通用异常
+     * 通用异常（兜底异常处理）
      */
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public R<?> handleException(Exception e, HttpServletRequest request) {
-        log.error("系统异常: {} - ", request.getRequestURI(), e);
-        return R.fail(HttpStatus.INTERNAL_SERVER_ERROR.value(), "系统错误，请联系管理员");
+        String errorId = UUID.randomUUID().toString();
+        log.error("系统异常 [ErrorID: {}]: {} - ", errorId, request.getRequestURI(), e);
+        return R.fail(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "系统错误，请联系管理员（错误ID: " + errorId.substring(0, 8) + "）");
     }
 }
