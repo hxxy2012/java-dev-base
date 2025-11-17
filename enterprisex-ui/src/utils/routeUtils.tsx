@@ -19,6 +19,8 @@ const OperLog = lazy(() => import('@/pages/monitor/operlog'));
 const LoginLog = lazy(() => import('@/pages/monitor/loginlog'));
 const OnlineUser = lazy(() => import('@/pages/monitor/online'));
 const CacheManage = lazy(() => import('@/pages/monitor/cache'));
+const JobManage = lazy(() => import('@/pages/monitor/job'));
+const ServerMonitor = lazy(() => import('@/pages/monitor/server'));
 
 // 组件映射表
 const componentMap: Record<string, React.LazyExoticComponent<React.FC<any>>> = {
@@ -36,7 +38,9 @@ const componentMap: Record<string, React.LazyExoticComponent<React.FC<any>>> = {
   'monitor/operlog/index': OperLog,
   'monitor/loginlog/index': LoginLog,
   'monitor/online/index': OnlineUser,
+  'monitor/job/index': JobManage,
   'monitor/cache/index': CacheManage,
+  'monitor/server/index': ServerMonitor,
 };
 
 /**

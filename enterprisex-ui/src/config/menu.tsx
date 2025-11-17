@@ -98,10 +98,22 @@ export const menuItems: MenuItem[] = [
         path: '/monitor/online',
       },
       {
+        key: 'job',
+        label: '定时任务',
+        icon: <FileTextOutlined />,
+        path: '/monitor/job',
+      },
+      {
         key: 'cache',
         label: '缓存管理',
         icon: <FileTextOutlined />,
         path: '/monitor/cache',
+      },
+      {
+        key: 'server',
+        label: '服务监控',
+        icon: <FileTextOutlined />,
+        path: '/monitor/server',
       },
       {
         key: 'operlog',
