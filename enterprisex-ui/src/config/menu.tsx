@@ -11,6 +11,7 @@ import {
   MonitorOutlined,
   BellOutlined,
   DashboardOutlined,
+  ToolOutlined,
 } from '@ant-design/icons';
 
 export interface MenuItem {
@@ -126,6 +127,25 @@ export const menuItems: MenuItem[] = [
         label: '登录日志',
         icon: <FileTextOutlined />,
         path: '/monitor/loginlog',
+      },
+      {
+        key: 'joblog',
+        label: '任务日志',
+        icon: <FileTextOutlined />,
+        path: '/monitor/job/log',
+      },
+    ],
+  },
+  {
+    key: 'tool',
+    label: '系统工具',
+    icon: <ToolOutlined />,
+    children: [
+      {
+        key: 'gen',
+        label: '代码生成',
+        icon: <FileTextOutlined />,
+        path: '/tool/gen',
       },
     ],
   },

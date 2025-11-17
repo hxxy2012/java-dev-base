@@ -20,7 +20,9 @@ const LoginLog = lazy(() => import('@/pages/monitor/loginlog'));
 const OnlineUser = lazy(() => import('@/pages/monitor/online'));
 const CacheManage = lazy(() => import('@/pages/monitor/cache'));
 const JobManage = lazy(() => import('@/pages/monitor/job'));
+const JobLog = lazy(() => import('@/pages/monitor/job/log'));
 const ServerMonitor = lazy(() => import('@/pages/monitor/server'));
+const CodeGen = lazy(() => import('@/pages/tool/gen'));
 
 // 组件映射表
 const componentMap: Record<string, React.LazyExoticComponent<React.FC<any>>> = {
@@ -39,8 +41,10 @@ const componentMap: Record<string, React.LazyExoticComponent<React.FC<any>>> = {
   'monitor/loginlog/index': LoginLog,
   'monitor/online/index': OnlineUser,
   'monitor/job/index': JobManage,
+  'monitor/job/log/index': JobLog,
   'monitor/cache/index': CacheManage,
   'monitor/server/index': ServerMonitor,
+  'tool/gen/index': CodeGen,
 };
 
 /**

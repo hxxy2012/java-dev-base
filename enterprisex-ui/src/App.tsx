@@ -31,7 +31,9 @@ const LoginLog = lazy(() => import('@/pages/monitor/loginlog'));
 const OnlineUser = lazy(() => import('@/pages/monitor/online'));
 const CacheManage = lazy(() => import('@/pages/monitor/cache'));
 const JobManage = lazy(() => import('@/pages/monitor/job'));
+const JobLog = lazy(() => import('@/pages/monitor/job/log'));
 const ServerMonitor = lazy(() => import('@/pages/monitor/server'));
+const CodeGen = lazy(() => import('@/pages/tool/gen'));
 
 function App() {
   const { routes } = useAuthStore();
@@ -60,8 +62,10 @@ function App() {
         { path: 'monitor/loginlog', element: <LoginLog /> },
         { path: 'monitor/online', element: <OnlineUser /> },
         { path: 'monitor/job', element: <JobManage /> },
+        { path: 'monitor/job/log', element: <JobLog /> },
         { path: 'monitor/cache', element: <CacheManage /> },
         { path: 'monitor/server', element: <ServerMonitor /> },
+        { path: 'tool/gen', element: <CodeGen /> },
       ]);
     }
   }, [routes]);
