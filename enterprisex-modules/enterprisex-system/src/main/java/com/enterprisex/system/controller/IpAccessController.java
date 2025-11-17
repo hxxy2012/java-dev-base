@@ -1,6 +1,7 @@
 package com.enterprisex.system.controller;
 
 import com.enterprisex.common.core.domain.R;
+import com.enterprisex.common.core.utils.IpUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Data;
@@ -210,22 +211,31 @@ public class IpAccessController {
             return true;
         }
 
+        // 支持CIDR格式，如 192.168.1.0/24
+        if (pattern.contains("/")) {
+            return IpUtils.isIpInCidr(ip, pattern);
+        }
+
         // 支持*通配符
         if (pattern.contains("*")) {
             String regex = pattern.replace(".", "\\.").replace("*", ".*");
             return Pattern.matches(regex, ip);
         }
 
-        // TODO: 可以扩展支持CIDR格式，如 192.168.1.0/24
         return false;
     }
 
     /**
-     * 验证IP地址格式
+     * 验证IP地址格式（支持CIDR、通配符和标准IP）
      */
     private boolean isValidIpAddress(String ip) {
         if (ip == null || ip.isEmpty()) {
             return false;
+        }
+
+        // 支持CIDR格式，如 192.168.1.0/24
+        if (ip.contains("/")) {
+            return IpUtils.isValidCidr(ip);
         }
 
         // 支持*通配符
@@ -234,22 +244,7 @@ public class IpAccessController {
         }
 
         // 标准IP格式
-        String[] parts = ip.split("\\.");
-        if (parts.length != 4) {
-            return false;
-        }
-
-        try {
-            for (String part : parts) {
-                int num = Integer.parseInt(part);
-                if (num < 0 || num > 255) {
-                    return false;
-                }
-            }
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
+        return IpUtils.isValidIp(ip);
     }
 
     /**

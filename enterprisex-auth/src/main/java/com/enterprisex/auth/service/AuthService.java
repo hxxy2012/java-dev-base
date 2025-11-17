@@ -2,6 +2,9 @@ package com.enterprisex.auth.service;
 
 import com.enterprisex.auth.domain.LoginRequest;
 import com.enterprisex.auth.domain.LoginResponse;
+import com.enterprisex.auth.domain.RouterVo;
+
+import java.util.List;
 
 /**
  * 认证服务接口
@@ -36,4 +39,28 @@ public interface AuthService {
      * @return 用户信息
      */
     LoginResponse.UserInfo getUserInfo(Long userId);
+
+    /**
+     * 将token加入黑名单
+     *
+     * @param token JWT token
+     * @param userId 用户ID
+     */
+    void addTokenToBlacklist(String token, Long userId);
+
+    /**
+     * 检查token是否在黑名单中
+     *
+     * @param token JWT token
+     * @return true-在黑名单中 false-不在黑名单中
+     */
+    boolean isTokenBlacklisted(String token);
+
+    /**
+     * 获取用户路由菜单
+     *
+     * @param userId 用户ID
+     * @return 路由菜单列表
+     */
+    List<RouterVo> getRouters(Long userId);
 }

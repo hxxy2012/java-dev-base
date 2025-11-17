@@ -166,6 +166,25 @@ public class JwtTokenProvider {
     }
 
     /**
+     * 获取Token的剩余有效期（秒）
+     */
+    public Long getExpirationFromToken(String token) {
+        try {
+            Claims claims = parseToken(token);
+            Date expiration = claims.getExpiration();
+            long remainingTime = expiration.getTime() - System.currentTimeMillis();
+            // 返回剩余秒数，如果已过期则返回0
+            return remainingTime > 0 ? remainingTime / 1000 : 0;
+        } catch (ExpiredJwtException e) {
+            // Token已过期
+            return 0L;
+        } catch (Exception e) {
+            log.error("获取Token过期时间失败: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
      * 刷新Token
      */
     public String refreshToken(String token) {

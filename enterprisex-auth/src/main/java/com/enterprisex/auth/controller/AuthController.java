@@ -70,16 +70,33 @@ public class AuthController {
      */
     @Operation(summary = "用户登出")
     @PostMapping("/logout")
-    public R<Void> logout(@RequestHeader(value = "X-Username", required = false) String username,
+    public R<Void> logout(@RequestHeader(value = "X-User-Id", required = false) Long userId,
+                           @RequestHeader(value = "X-Username", required = false) String username,
+                           @RequestHeader(value = "Authorization", required = false) String authorization,
                            HttpServletRequest httpRequest) {
-        // TODO: 清除Redis中的用户信息
+        try {
+            // 提取token
+            String token = null;
+            if (authorization != null && authorization.startsWith("Bearer ")) {
+                token = authorization.substring(7);
+            }
 
-        // 记录登出日志
-        if (username != null && !username.isEmpty()) {
-            loginLogService.recordLoginLog(username, 1, "登出成功", httpRequest);
+            // 将token加入黑名单（有效期设置为原token的剩余时间）
+            if (token != null && userId != null) {
+                authService.addTokenToBlacklist(token, userId);
+            }
+
+            // 记录登出日志
+            if (username != null && !username.isEmpty()) {
+                loginLogService.recordLoginLog(username, 1, "登出成功", httpRequest);
+            }
+
+            log.info("用户登出成功: userId={}, username={}", userId, username);
+            return R.ok("登出成功");
+        } catch (Exception e) {
+            log.error("用户登出失败", e);
+            return R.ok("登出成功"); // 即使失败也返回成功，避免暴露系统信息
         }
-
-        return R.ok("登出成功");
     }
 
     /**
@@ -127,9 +144,18 @@ public class AuthController {
     @GetMapping("/getRouters")
     public R<?> getRouters(@RequestHeader(value = "X-User-Id", required = false) Long userId,
                             @RequestHeader(value = "X-Username", required = false) String username) {
-        // TODO: 根据用户权限从数据库查询菜单
-        // 暂时返回空数组，前端会使用默认路由
         log.info("获取用户路由菜单: userId={}, username={}", userId, username);
-        return R.ok(new java.util.ArrayList<>());
+
+        if (userId == null) {
+            log.warn("用户未登录，返回空路由");
+            return R.ok(new java.util.ArrayList<>());
+        }
+
+        try {
+            return R.ok(authService.getRouters(userId));
+        } catch (Exception e) {
+            log.error("获取用户路由菜单失败: userId={}", userId, e);
+            return R.ok(new java.util.ArrayList<>());
+        }
     }
 }
