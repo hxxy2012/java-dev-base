@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,6 +31,9 @@ public class SysUserController {
 
     @Autowired
     private ISysUserService userService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     /**
      * 获取用户列表
@@ -87,11 +91,38 @@ public class SysUserController {
     /**
      * 重置密码
      */
+    @Log(title = "用户管理", businessType = BusinessType.UPDATE)
     @Operation(summary = "重置密码")
     @PutMapping("/resetPwd")
     public R<Void> resetPwd(@RequestBody SysUser user) {
-        // TODO: 实现密码重置逻辑（使用BCrypt加密）
-        return R.ok("密码重置成功");
+        if (user.getUserId() == null) {
+            return R.fail("用户ID不能为空");
+        }
+
+        // 检查用户是否存在
+        SysUser existUser = userService.getById(user.getUserId());
+        if (existUser == null) {
+            return R.fail("用户不存在");
+        }
+
+        // 检查是否为超级管理员（ID=1）
+        if (existUser.getUserId() == 1L) {
+            return R.fail("不允许重置超级管理员密码");
+        }
+
+        // 获取新密码，如果未提供则使用默认密码
+        String newPassword = user.getPassword();
+        if (newPassword == null || newPassword.isEmpty()) {
+            newPassword = "123456"; // 默认密码
+        }
+
+        // 使用BCrypt加密密码
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        existUser.setPassword(encodedPassword);
+
+        // 更新用户密码
+        boolean success = userService.updateById(existUser);
+        return R.toAjax(success);
     }
 
     /**

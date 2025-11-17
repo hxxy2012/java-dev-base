@@ -2,6 +2,7 @@ package com.enterprisex.system.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.enterprisex.common.core.domain.R;
+import com.enterprisex.common.core.utils.SecurityUtils;
 import com.enterprisex.system.domain.SysLoginLog;
 import com.enterprisex.system.domain.SysOperLog;
 import com.enterprisex.system.domain.SysUser;
@@ -95,10 +96,13 @@ public class DashboardController {
                 .ge(SysOperLog::getOperTime, todayStart)
         ));
 
-        // 未读消息数
-        // TODO: 从安全上下文获取当前用户ID
-        Long userId = 1L;
-        stats.setUnreadMessageCount(messageService.countUnreadMessages(userId));
+        // 未读消息数（如果用户已登录）
+        Long userId = SecurityUtils.getUserId();
+        if (userId != null) {
+            stats.setUnreadMessageCount(messageService.countUnreadMessages(userId));
+        } else {
+            stats.setUnreadMessageCount(0L);
+        }
 
         // 最近登录记录
         stats.setRecentLogins(getRecentLogins());

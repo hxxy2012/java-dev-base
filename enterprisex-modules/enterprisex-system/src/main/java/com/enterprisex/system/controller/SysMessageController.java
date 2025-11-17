@@ -2,6 +2,7 @@ package com.enterprisex.system.controller;
 
 import com.enterprisex.common.core.domain.R;
 import com.enterprisex.common.core.domain.TableDataInfo;
+import com.enterprisex.common.core.utils.SecurityUtils;
 import com.enterprisex.system.domain.SysMessage;
 import com.enterprisex.system.service.ISysMessageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,8 +31,10 @@ public class SysMessageController {
     @Operation(summary = "获取用户消息列表")
     @GetMapping("/list")
     public TableDataInfo<SysMessage> list(SysMessage message) {
-        // TODO: 从安全上下文获取当前用户ID，这里暂时使用固定值
-        Long userId = 1L;
+        Long userId = SecurityUtils.getUserId();
+        if (userId == null) {
+            return TableDataInfo.ok(List.of(), 0);
+        }
         List<SysMessage> list = messageService.selectUserMessageList(userId, message);
         return TableDataInfo.ok(list, list.size());
     }
@@ -42,8 +45,10 @@ public class SysMessageController {
     @Operation(summary = "获取未读消息数量")
     @GetMapping("/unreadCount")
     public R<Long> getUnreadCount() {
-        // TODO: 从安全上下文获取当前用户ID
-        Long userId = 1L;
+        Long userId = SecurityUtils.getUserId();
+        if (userId == null) {
+            return R.ok(0L);
+        }
         Long count = messageService.countUnreadMessages(userId);
         return R.ok(count);
     }
@@ -54,8 +59,10 @@ public class SysMessageController {
     @Operation(summary = "标记消息为已读")
     @PutMapping("/read/{messageId}")
     public R<Void> markAsRead(@PathVariable Long messageId) {
-        // TODO: 从安全上下文获取当前用户ID
-        Long userId = 1L;
+        Long userId = SecurityUtils.getUserId();
+        if (userId == null) {
+            return R.fail("用户未登录");
+        }
         return R.toAjax(messageService.markAsRead(messageId, userId));
     }
 
@@ -65,8 +72,10 @@ public class SysMessageController {
     @Operation(summary = "批量标记消息为已读")
     @PutMapping("/read/batch")
     public R<Void> batchMarkAsRead(@RequestBody List<Long> messageIds) {
-        // TODO: 从安全上下文获取当前用户ID
-        Long userId = 1L;
+        Long userId = SecurityUtils.getUserId();
+        if (userId == null) {
+            return R.fail("用户未登录");
+        }
         return R.toAjax(messageService.batchMarkAsRead(messageIds, userId));
     }
 
@@ -76,8 +85,10 @@ public class SysMessageController {
     @Operation(summary = "全部标记为已读")
     @PutMapping("/read/all")
     public R<Void> markAllAsRead() {
-        // TODO: 从安全上下文获取当前用户ID
-        Long userId = 1L;
+        Long userId = SecurityUtils.getUserId();
+        if (userId == null) {
+            return R.fail("用户未登录");
+        }
         return R.toAjax(messageService.markAllAsRead(userId));
     }
 
@@ -100,9 +111,13 @@ public class SysMessageController {
     @PostMapping("/send")
     public R<Void> sendMessage(@RequestBody SysMessage message) {
         // 设置发送人信息
-        // TODO: 从安全上下文获取当前用户信息
-        message.setSenderId(1L);
-        message.setSenderName("系统管理员");
+        Long senderId = SecurityUtils.getUserId();
+        String senderName = SecurityUtils.getUsername();
+        if (senderId == null) {
+            return R.fail("用户未登录");
+        }
+        message.setSenderId(senderId);
+        message.setSenderName(senderName != null ? senderName : "未知用户");
         return R.toAjax(messageService.sendMessage(message));
     }
 
@@ -113,9 +128,13 @@ public class SysMessageController {
     @PostMapping("/broadcast")
     public R<Void> broadcastMessage(@RequestBody SysMessage message) {
         // 设置发送人信息
-        // TODO: 从安全上下文获取当前用户信息
-        message.setSenderId(1L);
-        message.setSenderName("系统管理员");
+        Long senderId = SecurityUtils.getUserId();
+        String senderName = SecurityUtils.getUsername();
+        if (senderId == null) {
+            return R.fail("用户未登录");
+        }
+        message.setSenderId(senderId);
+        message.setSenderName(senderName != null ? senderName : "未知用户");
         return R.toAjax(messageService.broadcastMessage(message));
     }
 }
