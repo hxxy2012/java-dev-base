@@ -4,6 +4,14 @@
 
 ### Added - 新增功能
 
+#### 在线用户统计
+- ✅ **用户登录时存储在线信息到Redis**：记录userId、username、IP、userAgent、loginTime
+- ✅ **用户登出时删除在线信息**：保持数据一致性
+- ✅ **Dashboard实时展示在线用户数**：从Redis动态统计在线用户数量
+- ✅ **在线用户信息自动过期**：TTL与Token过期时间一致，自动清理
+- ✅ **新增AuthService.removeOnlineUser()**：删除在线用户信息
+- ✅ **新增IDashboardService.getOnlineUserCount()**：获取在线用户数量
+
 #### 数据权限拦截器框架
 - ✅ **@DataScope注解**：用于标记需要数据权限控制的Mapper方法
 - ✅ **DataScopeContext类**：数据权限上下文，存储用户权限信息
@@ -182,13 +190,13 @@
 ## 下一步计划
 
 ### 高优先级
-- [ ] 实现在线用户统计（从Redis Session获取）
+- [x] 实现在线用户统计（从Redis Session获取）
 - [x] 添加Dashboard数据缓存（提升性能）
 - [ ] 实现实时数据推送（WebSocket）
 - [ ] 添加数据导出功能（PDF、Excel）
 
 ### 中优先级
-- [ ] IP访问控制支持CIDR格式（如192.168.1.0/24）
+- [x] IP访问控制支持CIDR格式（如192.168.1.0/24）
 - [ ] 添加系统参数热更新功能
 - [ ] 实现用户在线状态展示
 - [ ] 添加操作日志详细查询和分析

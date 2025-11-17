@@ -13,10 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -49,6 +46,7 @@ public class DashboardServiceImpl implements IDashboardService {
     private static final String CACHE_KEY_PREFIX = "dashboard:";
     private static final String CACHE_KEY_BASIC_STATS = CACHE_KEY_PREFIX + "basic_stats";
     private static final String CACHE_KEY_USER_STATUS = CACHE_KEY_PREFIX + "user_status";
+    private static final String CACHE_KEY_ONLINE = "online_tokens:"; // 在线用户key前缀
     private static final int CACHE_EXPIRE_MINUTES = 5; // 缓存5分钟
 
     @Override
@@ -201,6 +199,17 @@ public class DashboardServiceImpl implements IDashboardService {
             case 7: return "强退";
             case 8: return "清空";
             default: return "其它";
+        }
+
+    @Override
+    public Long getOnlineUserCount() {
+        try {
+            // 从Redis获取所有在线用户的key
+            Collection<String> keys = redisCache.keys(CACHE_KEY_ONLINE + "*");
+            return keys != null ? (long) keys.size() : 0L;
+        } catch (Exception e) {
+            log.error("获取在线用户数量失败", e);
+            return 0L;
         }
     }
 }

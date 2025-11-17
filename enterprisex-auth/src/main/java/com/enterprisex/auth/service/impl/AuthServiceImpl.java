@@ -88,6 +88,9 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = tokenProvider.generateAccessToken(user.getUserId(), username, roleKey);
         String refreshToken = tokenProvider.generateRefreshToken(user.getUserId());
 
+        // 存储在线用户信息到Redis
+        storeOnlineUser(user.getUserId(), username, ipaddr, userAgent, accessToken);
+
         // 构建响应
         return LoginResponse.builder()
                 .accessToken(accessToken)
@@ -101,6 +104,34 @@ public class AuthServiceImpl implements AuthService {
                         .avatar(user.getAvatar())
                         .build())
                 .build();
+    }
+
+    /**
+     * 存储在线用户信息到Redis
+     */
+    private void storeOnlineUser(Long userId, String username, String ipaddr, String userAgent, String token) {
+        try {
+            // 构建在线用户信息
+            java.util.Map<String, Object> onlineUser = new java.util.HashMap<>();
+            onlineUser.put("userId", userId);
+            onlineUser.put("username", username);
+            onlineUser.put("ipaddr", ipaddr);
+            onlineUser.put("userAgent", userAgent);
+            onlineUser.put("loginTime", System.currentTimeMillis());
+            onlineUser.put("token", token);
+
+            // 存储到Redis，使用用户ID作为key的一部分
+            String key = CacheConstants.ONLINE_TOKEN_KEY + userId + ":" + token.substring(0, Math.min(8, token.length()));
+
+            // 过期时间设置为token过期时间
+            Long expiration = tokenProvider.getExpiration();
+            redisCache.setCacheObject(key, onlineUser, expiration.intValue(), TimeUnit.SECONDS);
+
+            log.info("用户登录成功，已存储在线状态: userId={}, username={}", userId, username);
+        } catch (Exception e) {
+            log.error("存储在线用户信息失败: userId={}", userId, e);
+            // 不抛出异常，避免影响登录流程
+        }
     }
 
     @Override
@@ -279,6 +310,22 @@ public class AuthServiceImpl implements AuthService {
             if (!CollectionUtils.isEmpty(router.getChildren())) {
                 setRouterMeta(router.getChildren());
             }
+        }
+    }
+
+    @Override
+    public void removeOnlineUser(Long userId, String token) {
+        try {
+            // 构建Redis key（与存储时保持一致）
+            String key = CacheConstants.ONLINE_TOKEN_KEY + userId + ":" + token.substring(0, Math.min(8, token.length()));
+
+            // 从Redis删除在线用户信息
+            redisCache.deleteObject(key);
+
+            log.info("用户登出，已删除在线状态: userId={}", userId);
+        } catch (Exception e) {
+            log.error("删除在线用户信息失败: userId={}", userId, e);
+            // 不抛出异常，避免影响登出流程
         }
     }
 }

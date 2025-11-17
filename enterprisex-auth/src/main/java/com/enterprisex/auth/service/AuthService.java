@@ -63,4 +63,12 @@ public interface AuthService {
      * @return 路由菜单列表
      */
     List<RouterVo> getRouters(Long userId);
+
+    /**
+     * 删除在线用户信息
+     *
+     * @param userId 用户ID
+     * @param token JWT token
+     */
+    void removeOnlineUser(Long userId, String token);
 }

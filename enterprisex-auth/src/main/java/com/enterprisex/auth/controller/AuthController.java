@@ -81,9 +81,10 @@ public class AuthController {
                 token = authorization.substring(7);
             }
 
-            // 将token加入黑名单（有效期设置为原token的剩余时间）
+            // 将token加入黑名单并删除在线用户信息
             if (token != null && userId != null) {
                 authService.addTokenToBlacklist(token, userId);
+                authService.removeOnlineUser(userId, token);
             }
 
             // 记录登出日志

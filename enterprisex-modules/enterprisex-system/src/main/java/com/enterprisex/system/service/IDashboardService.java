@@ -56,6 +56,13 @@ public interface IDashboardService {
     List<Map<String, Object>> getLoginStats(int days);
 
     /**
+     * 获取在线用户数量
+     *
+     * @return 在线用户数量
+     */
+    Long getOnlineUserCount();
+
+    /**
      * 清除Dashboard缓存
      */
     void clearCache();

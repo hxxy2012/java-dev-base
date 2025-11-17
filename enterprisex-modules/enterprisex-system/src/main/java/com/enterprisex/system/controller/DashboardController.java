@@ -60,8 +60,8 @@ public class DashboardController {
         stats.setRoleCount(basicStats.get("roleCount"));
         stats.setDeptCount(basicStats.get("deptCount"));
 
-        // 在线用户数（这里简化处理，实际应该从Redis获取在线会话数）
-        stats.setOnlineUserCount(0L);
+        // 在线用户数（从Redis实时获取）
+        stats.setOnlineUserCount(dashboardService.getOnlineUserCount());
 
         // 今日统计
         Map<String, Long> todayStats = dashboardService.getTodayStats();
