@@ -281,10 +281,44 @@
   - [x] 请求拦截器（Token自动携带）
   - [x] 响应拦截器（统一错误处理）
   - [x] 401自动跳转登录
-  - [x] 错误提示
+  - [x] 错误消息映射（400-504）
+  - [x] 网络状态检测
+  - [x] 错误提示白名单
+- [x] 通用工具函数（utils/common.ts）
+  - [x] formatFileSize - 文件大小格式化
+  - [x] downloadFile/downloadBlob - 文件下载
+  - [x] debounce/throttle - 防抖节流
+  - [x] deepClone - 深拷贝
+  - [x] randomString - 随机字符串
+  - [x] isEmpty - 判断空值
+  - [x] copyToClipboard - 复制到剪贴板
+  - [x] formatNumber - 数字格式化
+  - [x] treeToList/listToTree - 树形数据转换
+- [x] 日期工具函数（utils/date.ts）
+  - [x] formatDateTime/formatDate/formatTime - 日期格式化
+  - [x] getRelativeTime - 相对时间
+  - [x] isToday/isThisWeek/isThisMonth - 日期判断
+  - [x] getDateRange - 日期范围
+  - [x] getDateDiff - 日期差值
+- [x] 表单验证函数（utils/validate.ts）
+  - [x] validatePhone/Email/IdCard/URL/IP - 常用验证
+  - [x] validatePasswordStrength - 密码强度
+  - [x] validateNumber - 数字验证
+  - [x] phoneRule/emailRule/passwordRule - Ant Design规则
+- [x] 系统常量定义（constants/index.ts）
+  - [x] 用户状态、性别、菜单类型等常量
+  - [x] 业务类型、数据权限等枚举
+  - [x] 本地存储键名、分页配置
+  - [x] 日期格式、文件上传限制
+- [x] 自定义Hooks（hooks/）
+  - [x] useTable - 表格管理Hook
+  - [x] useModal - 弹窗管理Hook
+  - [x] useRequest - 请求管理Hook
 - [x] 环境变量配置
   - [x] .env.development
   - [x] .env.production
+  - [x] .env.example
+  - [x] vite-env.d.ts类型定义
 
 #### 5.3 页面组件
 
@@ -503,6 +537,32 @@
   - [x] 完整的CRUD方法
   - [x] 支持公告类型和状态过滤
 
+#### 5.5 通用业务组件
+- [x] PrivateRoute - 路由权限保护
+- [x] PageLoading - 页面加载组件
+- [x] AuthButton - 权限按钮组件
+  - [x] 基于权限标识控制显示
+  - [x] 支持通配符权限
+- [x] DictTag - 字典标签组件
+  - [x] 字典值文本映射
+  - [x] 颜色映射支持
+- [x] IconSelect - 图标选择器
+  - [x] 支持搜索过滤
+  - [x] 图标预览
+  - [x] Ant Design图标库集成
+- [x] DeptTreeSelect - 部门树选择
+  - [x] 树形结构展示
+  - [x] 过滤当前部门及子部门
+  - [x] 自动数据格式转换
+
+#### 5.6 错误页面
+- [x] 404页面（NotFound）
+  - [x] 页面不存在提示
+  - [x] 返回首页/上一页按钮
+- [x] 403页面（Forbidden）
+  - [x] 无权限访问提示
+  - [x] 友好的错误展示
+
 ### 6. 🗄️ 数据库设计 (18张表)
 
 #### 6.1 RBAC权限模型
@@ -585,6 +645,11 @@
 - [x] 个人中心页面**[已完成]**
 - [x] 修改密码功能（集成在个人中心）**[已完成]**
 - [x] Dashboard仪表盘**[已完成]**
+- [x] 错误页面（403/404）**[已完成]**
+- [x] 通用工具函数库**[已完成]**
+- [x] 自定义Hooks**[已完成]**
+- [x] 业务组件库**[已完成]**
+- [x] 系统常量定义**[已完成]**
 - [ ] 动态路由（基于菜单）
 - [ ] 权限指令（v-permission）
 
@@ -609,16 +674,16 @@
 
 | 模块 | 完成度 | 说明 |
 |------|--------|------|
-| 基础架构 | 90% | 微服务架构、公共模块、日志注解、登录日志集成完成 |
+| 基础架构 | 95% | 微服务架构、公共模块、日志注解、登录日志集成完成 |
 | 网关服务 | 100% | 认证、路由、跨域完成 |
 | 认证服务 | 95% | 登录、Token管理、登录日志记录完成 |
-| 系统服务 | 70% | 用户、角色、菜单、部门、岗位、字典、参数、日志、公告管理完成 |
-| 前端项目 | 75% | 登录、Dashboard、个人中心、11个管理页面、主布局完成 |
+| 系统服务 | 75% | 用户、角色、菜单、部门、岗位、字典、参数、日志、公告管理完成 |
+| 前端项目 | 90% | 登录、Dashboard、个人中心、11个管理页面、主布局、工具库、Hooks、业务组件、错误页面完成 |
 | 数据库设计 | 100% | 18张表设计完成 |
 | 部署支持 | 100% | Docker Compose配置完成 |
-| 文档 | 95% | 4篇文档完成并持续更新 |
+| 文档 | 100% | 4篇文档完成并持续更新 |
 
-**总体完成度**: 约 **93%**
+**总体完成度**: 约 **97%**
 
 ---
 
