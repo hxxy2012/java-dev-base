@@ -2,7 +2,9 @@ package com.enterprisex.auth.controller;
 
 import com.enterprisex.auth.domain.LoginRequest;
 import com.enterprisex.auth.domain.LoginResponse;
+import com.enterprisex.auth.service.AuthService;
 import com.enterprisex.auth.service.LoginLogService;
+import com.enterprisex.auth.util.RequestUtil;
 import com.enterprisex.common.core.constant.Constants;
 import com.enterprisex.common.core.domain.R;
 import com.enterprisex.common.security.service.JwtTokenProvider;
@@ -31,6 +33,9 @@ public class AuthController {
     @Autowired
     private LoginLogService loginLogService;
 
+    @Autowired
+    private AuthService authService;
+
     /**
      * 登录
      */
@@ -39,40 +44,25 @@ public class AuthController {
     public R<LoginResponse> login(@Validated @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
         log.info("用户登录: {}", request.getUsername());
 
-        // TODO: 实际项目中应该从数据库验证用户名密码
-        // 这里为了演示，直接验证 admin/admin123
-        if (!"admin".equals(request.getUsername()) || !"admin123".equals(request.getPassword())) {
+        try {
+            // 获取IP和UserAgent
+            String ipaddr = RequestUtil.getIpAddr(httpRequest);
+            String userAgent = RequestUtil.getUserAgent(httpRequest);
+
+            // 调用认证服务进行登录
+            LoginResponse response = authService.login(request, ipaddr, userAgent);
+
+            // 记录登录成功日志
+            loginLogService.recordLoginLog(request.getUsername(), 1, "登录成功", httpRequest);
+
+            return R.ok("登录成功", response);
+
+        } catch (Exception e) {
             // 记录登录失败日志
-            loginLogService.recordLoginLog(request.getUsername(), 0, "用户名或密码错误", httpRequest);
-            return R.fail("用户名或密码错误");
+            loginLogService.recordLoginLog(request.getUsername(), 0, e.getMessage(), httpRequest);
+            log.error("用户登录失败: {}", request.getUsername(), e);
+            return R.fail(e.getMessage());
         }
-
-        // 模拟用户信息
-        Long userId = 1L;
-        String username = "admin";
-
-        // 生成Token
-        String accessToken = tokenProvider.generateAccessToken(userId, username, "admin");
-        String refreshToken = tokenProvider.generateRefreshToken(userId);
-
-        // 构建响应
-        LoginResponse response = LoginResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .tokenType(Constants.TOKEN_PREFIX.trim())
-                .expiresIn(tokenProvider.getExpiration())
-                .userInfo(LoginResponse.UserInfo.builder()
-                        .userId(userId)
-                        .username(username)
-                        .nickname("系统管理员")
-                        .avatar(null)
-                        .build())
-                .build();
-
-        // 记录登录成功日志
-        loginLogService.recordLoginLog(username, 1, "登录成功", httpRequest);
-
-        return R.ok("登录成功", response);
     }
 
     /**
@@ -126,14 +116,7 @@ public class AuthController {
     @GetMapping("/info")
     public R<LoginResponse.UserInfo> getInfo(@RequestHeader("X-User-Id") Long userId,
                                                @RequestHeader("X-Username") String username) {
-        // TODO: 从数据库查询完整的用户信息
-        LoginResponse.UserInfo userInfo = LoginResponse.UserInfo.builder()
-                .userId(userId)
-                .username(username)
-                .nickname("系统管理员")
-                .avatar(null)
-                .build();
-
+        LoginResponse.UserInfo userInfo = authService.getUserInfo(userId);
         return R.ok(userInfo);
     }
 

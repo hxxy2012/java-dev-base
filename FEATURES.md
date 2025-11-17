@@ -18,8 +18,10 @@
   - [x] 基础实体类（BaseEntity）
   - [x] 全局异常处理（GlobalExceptionHandler）
   - [x] 业务异常（ServiceException）
+  - [x] 自定义异常类（AuthenticationException、ResourceNotFoundException、DataValidationException、FileOperationException）
+  - [x] 错误码常量（ErrorCode）
   - [x] 字符串工具类（StringUtils）
-  - [x] 常量定义（Constants、CacheConstants）
+  - [x] 常量定义（Constants、CacheConstants、ErrorCode）
 
 - [x] common-security - 安全公共模块
   - [x] JWT Token提供者（JwtTokenProvider）
@@ -48,6 +50,20 @@
   - [x] OpenAPI 3.0配置
   - [x] Knife4j集成
 
+- [x] common-web - Web公共模块
+  - [x] 全局异常处理器（GlobalExceptionHandler）
+  - [x] 参数验证异常处理
+  - [x] 业务异常统一处理
+  - [x] HTTP异常处理
+  - [x] 文件上传异常处理
+
+- [x] common-excel - Excel处理模块
+  - [x] ExcelUtil工具类
+  - [x] EasyExcel集成
+  - [x] Excel导出功能
+  - [x] 单表导出
+  - [x] 多表导出
+
 ### 2. 🚪 网关服务 (8080)
 
 #### 2.1 核心功能
@@ -68,9 +84,14 @@
 
 #### 3.1 认证功能
 - [x] 用户登录（POST /auth/login）
+  - [x] 数据库用户验证
+  - [x] BCrypt密码加密验证
+  - [x] 用户状态检查
+  - [x] 角色权限查询
 - [x] 用户登出（POST /auth/logout）
 - [x] Token刷新（POST /auth/refresh）
 - [x] 获取用户信息（GET /auth/info）
+  - [x] 从数据库查询完整用户信息
 
 #### 3.2 Token管理
 - [x] AccessToken生成（2小时有效期）
@@ -82,6 +103,12 @@
 - [x] LoginRequest - 登录请求
 - [x] LoginResponse - 登录响应
 - [x] UserInfo - 用户信息
+- [x] UserAuthInfo - 用户认证信息实体
+
+#### 3.4 密码安全
+- [x] BCrypt密码编码器配置
+- [x] Spring Security Crypto集成
+- [x] 密码强度验证
 
 ### 4. 📊 系统服务 (9201)
 
@@ -640,6 +667,8 @@
 - [x] DEVELOPMENT_GUIDE.md - 开发指南
 - [x] PROJECT_STRUCTURE.md - 项目结构说明
 - [x] FEATURES.md - 功能清单（本文件）
+- [x] API_EXAMPLES.md - API调用示例文档
+- [x] CONFIGURATION_GUIDE.md - 配置文件说明文档
 - [x] .gitignore - Git忽略配置
 
 ---
