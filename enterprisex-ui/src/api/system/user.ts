@@ -83,3 +83,30 @@ export const resetUserPwd = (userId: number, password: string) => {
 export const changeUserStatus = (userId: number, status: number) => {
   return put('/system/user/changeStatus', { userId, status });
 };
+
+/**
+ * 导出用户数据
+ */
+export const exportUser = (params: UserQuery) => {
+  return `/api/system/user/export?${new URLSearchParams(params as any).toString()}`;
+};
+
+/**
+ * 下载用户导入模板
+ */
+export const downloadTemplate = () => {
+  return '/api/system/user/importTemplate';
+};
+
+/**
+ * 导入用户数据
+ */
+export const importUser = (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return post('/system/user/import', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};

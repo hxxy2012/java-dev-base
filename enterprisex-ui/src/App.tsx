@@ -36,6 +36,8 @@ const ServerMonitor = lazy(() => import('@/pages/monitor/server'));
 const CodeGen = lazy(() => import('@/pages/tool/gen'));
 const FileManage = lazy(() => import('@/pages/system/file'));
 const DatabasePage = lazy(() => import('@/pages/tool/database'));
+const BackupPage = lazy(() => import('@/pages/tool/backup'));
+const LogViewerPage = lazy(() => import('@/pages/tool/logviewer'));
 const SwaggerDoc = lazy(() => import('@/pages/tool/swagger'));
 const SystemTool = lazy(() => import('@/pages/tool/system'));
 const HealthCheckPage = lazy(() => import('@/pages/monitor/health'));
@@ -74,6 +76,8 @@ function App() {
         { path: 'tool/gen', element: <CodeGen /> },
         { path: 'system/file', element: <FileManage /> },
         { path: 'tool/database', element: <DatabasePage /> },
+        { path: 'tool/backup', element: <BackupPage /> },
+        { path: 'tool/logviewer', element: <LogViewerPage /> },
         { path: 'tool/swagger', element: <SwaggerDoc /> },
         { path: 'tool/system', element: <SystemTool /> },
       ]);

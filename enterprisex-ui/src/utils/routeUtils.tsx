@@ -25,6 +25,8 @@ const ServerMonitor = lazy(() => import('@/pages/monitor/server'));
 const CodeGen = lazy(() => import('@/pages/tool/gen'));
 const FileManage = lazy(() => import('@/pages/system/file'));
 const DatabasePage = lazy(() => import('@/pages/tool/database'));
+const BackupPage = lazy(() => import('@/pages/tool/backup'));
+const LogViewerPage = lazy(() => import('@/pages/tool/logviewer'));
 const SwaggerDoc = lazy(() => import('@/pages/tool/swagger'));
 const SystemTool = lazy(() => import('@/pages/tool/system'));
 const HealthCheckPage = lazy(() => import('@/pages/monitor/health'));
@@ -52,6 +54,8 @@ const componentMap: Record<string, React.LazyExoticComponent<React.FC<any>>> = {
   'tool/gen/index': CodeGen,
   'system/file/index': FileManage,
   'tool/database/index': DatabasePage,
+  'tool/backup/index': BackupPage,
+  'tool/logviewer/index': LogViewerPage,
   'tool/swagger/index': SwaggerDoc,
   'tool/system/index': SystemTool,
   'monitor/health/index': HealthCheckPage,

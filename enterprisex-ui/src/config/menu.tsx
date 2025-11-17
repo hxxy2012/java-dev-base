@@ -166,6 +166,18 @@ export const menuItems: MenuItem[] = [
         path: '/tool/database',
       },
       {
+        key: 'backup',
+        label: '数据备份',
+        icon: <FileTextOutlined />,
+        path: '/tool/backup',
+      },
+      {
+        key: 'logviewer',
+        label: '日志查看',
+        icon: <FileTextOutlined />,
+        path: '/tool/logviewer',
+      },
+      {
         key: 'swagger',
         label: '系统接口',
         icon: <FileTextOutlined />,

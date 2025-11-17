@@ -10,13 +10,18 @@ import {
   Switch,
   message,
   Popconfirm,
+  Upload,
 } from 'antd';
+import type { UploadFile } from 'antd/es/upload/interface';
 import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
   SearchOutlined,
   ReloadOutlined,
+  UploadOutlined,
+  DownloadOutlined,
+  FileExcelOutlined,
 } from '@ant-design/icons';
 import {
   getUserList,
@@ -24,6 +29,9 @@ import {
   updateUser,
   deleteUser,
   changeUserStatus,
+  exportUser,
+  downloadTemplate,
+  importUser,
   User,
   UserQuery,
 } from '@/api/system/user';
@@ -37,6 +45,8 @@ const UserManage: React.FC = () => {
     pageSize: 10,
   });
   const [visible, setVisible] = useState(false);
+  const [importVisible, setImportVisible] = useState(false);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [form] = Form.useForm();
   const [searchForm] = Form.useForm();
 
@@ -143,6 +153,50 @@ const UserManage: React.FC = () => {
       loadData();
     } catch (error) {
       console.error('状态修改失败', error);
+    }
+  };
+
+  // 导出用户
+  const handleExport = () => {
+    const url = exportUser(queryParams);
+    window.open(url, '_blank');
+    message.success('导出成功');
+  };
+
+  // 下载模板
+  const handleDownloadTemplate = () => {
+    window.open(downloadTemplate(), '_blank');
+    message.success('模板下载开始');
+  };
+
+  // 导入用户
+  const handleImport = async () => {
+    if (fileList.length === 0) {
+      message.warning('请选择要导入的文件');
+      return;
+    }
+
+    const file = fileList[0].originFileObj as File;
+    setLoading(true);
+    try {
+      const response = await importUser(file);
+      if (response.code === 200) {
+        message.success(response.msg || '导入成功');
+      } else {
+        // 显示详细的失败信息（包含HTML换行）
+        Modal.warning({
+          title: '导入结果',
+          content: <div dangerouslySetInnerHTML={{ __html: response.msg }} />,
+          width: 600,
+        });
+      }
+      setImportVisible(false);
+      setFileList([]);
+      loadData();
+    } catch (error) {
+      message.error('导入失败');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -271,6 +325,15 @@ const UserManage: React.FC = () => {
         <Button danger icon={<DeleteOutlined />} onClick={handleBatchDelete}>
           批量删除
         </Button>
+        <Button icon={<UploadOutlined />} onClick={() => setImportVisible(true)}>
+          导入
+        </Button>
+        <Button icon={<DownloadOutlined />} onClick={handleExport}>
+          导出
+        </Button>
+        <Button icon={<FileExcelOutlined />} onClick={handleDownloadTemplate}>
+          下载模板
+        </Button>
       </Space>
 
       {/* 表格 */}
@@ -299,6 +362,47 @@ const UserManage: React.FC = () => {
         }}
         scroll={{ x: 1500 }}
       />
+
+      {/* 导入弹窗 */}
+      <Modal
+        title="导入用户"
+        open={importVisible}
+        onOk={handleImport}
+        onCancel={() => {
+          setImportVisible(false);
+          setFileList([]);
+        }}
+        confirmLoading={loading}
+      >
+        <Space direction="vertical" style={{ width: '100%' }}>
+          <div>
+            <p>请先下载模板，按照模板格式填写数据，然后上传Excel文件进行导入。</p>
+            <p style={{ color: '#ff4d4f' }}>注意：用户名不能重复，密码为空时默认为 123456</p>
+          </div>
+          <Upload
+            fileList={fileList}
+            beforeUpload={(file) => {
+              const isExcel =
+                file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+                file.type === 'application/vnd.ms-excel' ||
+                file.name.endsWith('.xlsx') ||
+                file.name.endsWith('.xls');
+              if (!isExcel) {
+                message.error('只能上传Excel文件！');
+                return false;
+              }
+              setFileList([file as UploadFile]);
+              return false;
+            }}
+            onRemove={() => {
+              setFileList([]);
+            }}
+            maxCount={1}
+          >
+            <Button icon={<UploadOutlined />}>选择Excel文件</Button>
+          </Upload>
+        </Space>
+      </Modal>
 
       {/* 新增/编辑弹窗 */}
       <Modal

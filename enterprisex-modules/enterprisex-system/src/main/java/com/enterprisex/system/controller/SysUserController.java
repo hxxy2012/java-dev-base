@@ -13,7 +13,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -113,5 +115,63 @@ public class SysUserController {
     public void export(SysUser user, HttpServletResponse response) {
         List<SysUser> list = userService.selectUserList(user);
         ExcelUtil.exportExcel(response, list, SysUser.class, "用户数据");
+    }
+
+    /**
+     * 下载用户导入模板
+     */
+    @Operation(summary = "下载用户导入模板")
+    @GetMapping("/importTemplate")
+    public void importTemplate(HttpServletResponse response) {
+        List<SysUser> list = new ArrayList<>();
+        ExcelUtil.exportExcel(response, list, SysUser.class, "用户导入模板");
+    }
+
+    /**
+     * 导入用户数据
+     */
+    @Log(title = "用户管理", businessType = BusinessType.IMPORT)
+    @Operation(summary = "导入用户数据")
+    @PostMapping("/import")
+    public R<String> importData(@RequestParam("file") MultipartFile file) {
+        try {
+            List<SysUser> userList = ExcelUtil.importExcel(file.getInputStream(), SysUser.class);
+            if (userList == null || userList.isEmpty()) {
+                return R.fail("导入数据为空");
+            }
+
+            int successCount = 0;
+            int failCount = 0;
+            StringBuilder failMsg = new StringBuilder();
+
+            for (SysUser user : userList) {
+                try {
+                    // 设置默认密码（如果为空）
+                    if (user.getPassword() == null || user.getPassword().isEmpty()) {
+                        user.setPassword("123456");
+                    }
+                    // 设置默认状态（如果为空）
+                    if (user.getStatus() == null) {
+                        user.setStatus(1);
+                    }
+                    userService.insertUser(user);
+                    successCount++;
+                } catch (Exception e) {
+                    failCount++;
+                    failMsg.append("用户名: ").append(user.getUserName())
+                           .append(" - ").append(e.getMessage())
+                           .append("<br/>");
+                }
+            }
+
+            if (failCount > 0) {
+                return R.fail(String.format("导入完成，成功%d条，失败%d条。<br/>失败原因：<br/>%s",
+                    successCount, failCount, failMsg.toString()));
+            } else {
+                return R.ok(String.format("导入成功，共导入%d条数据", successCount));
+            }
+        } catch (Exception e) {
+            return R.fail("导入失败: " + e.getMessage());
+        }
     }
 }
