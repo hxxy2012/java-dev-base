@@ -355,5 +355,28 @@ CREATE TABLE `sys_file` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='文件信息表';
 
 -- ========================================
+-- 19. 系统消息表
+-- ========================================
+DROP TABLE IF EXISTS `sys_message`;
+CREATE TABLE `sys_message` (
+    `message_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '消息ID',
+    `title` VARCHAR(100) NOT NULL COMMENT '消息标题',
+    `content` TEXT NOT NULL COMMENT '消息内容',
+    `message_type` TINYINT DEFAULT 1 COMMENT '消息类型：1系统消息2通知消息3待办消息',
+    `level` TINYINT DEFAULT 1 COMMENT '消息级别：1普通2重要3紧急',
+    `user_id` BIGINT NOT NULL COMMENT '接收用户ID',
+    `is_read` TINYINT DEFAULT 0 COMMENT '是否已读：0未读1已读',
+    `read_time` DATETIME DEFAULT NULL COMMENT '阅读时间',
+    `sender_id` BIGINT DEFAULT NULL COMMENT '发送人ID',
+    `sender_name` VARCHAR(50) DEFAULT NULL COMMENT '发送人名称',
+    `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (`message_id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_is_read` (`is_read`),
+    KEY `idx_message_type` (`message_type`),
+    KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统消息表';
+
+-- ========================================
 -- 初始化脚本完成
 -- ========================================
